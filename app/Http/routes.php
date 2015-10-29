@@ -15,6 +15,10 @@ Route::get('/', function() {
 	return Redirect::to('/youtube');
 });
 
+Route::get('/oauth2callback', function() {
+	// TODO
+});
+
 Route::get('/youtube', 'YoutubeController@index');
 Route::resource('events', 'EventsController');
 
