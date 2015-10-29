@@ -11,6 +11,10 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function() {
+	return Redirect::to('/youtube');
 });
+
+Route::get('/youtube', 'YoutubeController@index');
+Route::resource('events', 'EventsController');
+

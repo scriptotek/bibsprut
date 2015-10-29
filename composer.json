@@ -6,7 +6,12 @@
     "type": "project",
     "require": {
         "php": ">=5.5.9",
-        "laravel/framework": "5.1.*"
+        "laravel/framework": "5.1.*",
+        "alaouy/youtube": "~1.2",
+        "graham-campbell/markdown": "~5.1",
+        "cebe/markdown": "~1.0.1",
+        "sabre/dav": "~3.0",
+        "google/apiclient": "~1.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

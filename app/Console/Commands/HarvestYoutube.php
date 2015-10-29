@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Jobs\YoutubeHarvestJob;
+use Illuminate\Console\Command;
+use Illuminate\Foundation\Bus\DispatchesCommands;
+
+class HarvestYoutube extends Command
+{
+    use DispatchesCommands;
+
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'harvest:youtube';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Harvest videos from Youtube.';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+        $this->info('Harvesting video metadata from Youtube');
+        $this->dispatch(
+            new YoutubeHarvestJob()
+        );
+        $this->info('Done');
+    }
+}
