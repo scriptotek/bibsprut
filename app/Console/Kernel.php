@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \App\Console\Commands\HarvestYoutube::class,
+        \App\Console\Commands\GenerateFeed::class,
     ];
 
     /**

@@ -7,7 +7,7 @@
 <div class="panel panel-default">
   <!-- Default panel contents -->
   <div class="panel-heading">
-  	<h3>YouTube-videoer</h3>
+  	<h3>Arrangementer</h3>
   </div>
   <!--<div class="panel-body">
     <p>...</p>
@@ -15,25 +15,35 @@
 
   <!-- List group -->
   <ul class="list-group">
-@foreach ($videos as $video)
+@foreach ($events as $event)
   <li class="list-group-item">
-  	<strong>{{ $video['title'] }}</strong>
-    (<a href="https://www.youtube.com/watch?v={{ $video['youtube_id'] }}">YouTube</a>)
-  	<div>
-  	@foreach ($video->tags as $tag)
-  	  <span class="label label-success">{{ $tag }}</span>
-  	@endforeach
-
-  	@foreach ($video->playlists as $plist)
-  	  <span class="label label-info">{{ $plist->title }}</span>
-  	@endforeach
-  	</div>
-    {!! $video->descriptionAsHtml() !!}
-    <div>
-    @if (is_null($video->presentation))
-    <a href="{{ action('EventsController@getCreate', ['videoId' => $video['id']]) }}" class="btn btn-primary">Opprett arrangement</a>
+  	<strong>{{ $event['title'] }}</strong>, {{ $event['start_date'] }},
+    @if ($event->vortex_url)
+      <a href="{{ $event->vortex_url }}">
+        <em class="zmdi zmdi-link"></em>
+        Vortex
+      </a>
     @endif
-    </div>
+    @if ($event->facebook_url)
+      <a href="{{ $event->facebook_url }}">
+        <em class="zmdi zmdi-link"></em>
+        Facebook
+      </a>
+    @endif
+
+    <a href="{{ action('EventsController@edit', $event->id) }}">
+      <em class="zmdi zmdi-edit"></em>
+      Rediger
+    </a>
+
+    @foreach ($event->presentations as $presentation)
+      @if ($presentation->video)
+        <div>
+          {{ $presentation->start_time }}–{{ $presentation->end_time }}: <a href="{{ $presentation->video->link() }}">Opptak på YouTube</a>
+        </div>
+      @endif
+
+    @endforeach
   </li>
 
 @endforeach
