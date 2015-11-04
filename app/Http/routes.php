@@ -15,10 +15,13 @@ Route::get('/', function() {
 	return Redirect::to('/youtube');
 });
 
-Route::get('/oauth2callback', function() {
-	// TODO
+
+Route::group(['middleware' => 'oauth.google'], function () {
+
+	Route::get('/youtube', 'YoutubeController@index');
+	Route::resource('events', 'EventsController');
+    Route::get('/oauth2callback', function() {
+        return Redirect::to('/youtube');
+    });
+
 });
-
-Route::get('/youtube', 'YoutubeController@index');
-Route::resource('events', 'EventsController');
-

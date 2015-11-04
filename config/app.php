@@ -142,6 +142,7 @@ return [
          */
         Alaouy\Youtube\YoutubeServiceProvider::class,
         GrahamCampbell\Markdown\MarkdownServiceProvider::class,
+        PulkitJalan\Google\GoogleServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -201,6 +202,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View'      => Illuminate\Support\Facades\View::class,
         'Markdown'  => GrahamCampbell\Markdown\Facades\Markdown::class,
+        'Google'    => PulkitJalan\Google\Facades\Google::class
 
     ],
 
