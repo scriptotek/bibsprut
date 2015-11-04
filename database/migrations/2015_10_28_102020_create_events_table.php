@@ -20,12 +20,17 @@ class CreateEventsTable extends Migration
             $table->text('description');
             $table->jsonb('tags');
             $table->string('thumbnail');
+            $table->date('start_date');
 
             $table->string('vortex_url')->nullable();
-            $table->string('facebook_url')->nullable();
-
+            $table->string('facebook_id')->nullable();
             $table->string('youtube_playlist_id')->nullable();
+
+            $table->string('uuid')->unique();
+            $table->dateTime('unpublished_at');
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

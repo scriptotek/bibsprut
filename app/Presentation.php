@@ -31,4 +31,26 @@ class Presentation extends Model
     {
         return $this->hasOne('App\YoutubeVideo');
     }
+
+    /**
+     * Get the start time without seconds
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getStartTimeAttribute($value)
+    {
+        return preg_replace('/:00$/', '', $value);
+    }
+
+    /**
+     * Get the end time without seconds
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getEndTimeAttribute($value)
+    {
+        return preg_replace('/:00$/', '', $value);
+    }
 }

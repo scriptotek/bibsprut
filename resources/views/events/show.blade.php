@@ -8,6 +8,10 @@
 	<a href="{{ action('EventsController@edit', $event->id) }}">[Rediger]</a>
 </p>
 
+<p>
+  Dato: {{ $event->start_date }}
+</p>
+
 {!! $event->descriptionAsHtml() !!}
 
 
@@ -75,7 +79,7 @@
   <ul class="list-group">
 	  @foreach ($event->presentations as $presentation)
 	  <li class="list-group-item">
-		<div>Start: .. Slutt: ..</div>
+		<div>Start: {{ $presentation->start_time }} Slutt: {{ $presentation->end_time }}</div>
 		<div>Personer: ...</div>
 
 		<h4>Opptak</h4>

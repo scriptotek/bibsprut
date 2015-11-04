@@ -47,4 +47,8 @@ class YoutubeVideo extends Model
         return $parser->parse($this->description);
     }
 
+    public function link()
+    {
+        return 'https://www.youtube.com/watch?v=' . $this->youtube_id;
+    }
 }
