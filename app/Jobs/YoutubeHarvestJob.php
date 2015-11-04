@@ -37,27 +37,63 @@ class YoutubeHarvestJob extends Job implements SelfHandling
         return $this->getPlaylistVideos($playlistId);
     }
 
-    public function harvestVideos()
+    public function normalizeDateTime($date)
     {
-        foreach ($this->getUploads() as $response) {
-            $id = $response->contentDetails->videoId;
-            $response = \Youtube::getVideoInfo($id);
+        return preg_replace('/([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}).*/', '\1-\2-\3 \4:\5:\6', $date);
+    }
 
-            $video = \App\YoutubeVideo::firstOrCreate(['youtube_id' => $id]);
+    public function normalizeDate($date)
+    {
+        return preg_replace('/([0-9]{4})-([0-9]{2})-([0-9]{2}).*/', '\1-\2-\3', $date);
+    }
 
-            $video->license = $response->status->license;
-            $video->is_public = ($response->status->privacyStatus == 'public');
+    public function storeVideo($data)
+    {
+        $video = \App\YoutubeVideo::firstOrNew(['youtube_id' => $data->id]);
 
-            $video->published_at = $response->snippet->publishedAt;
-            $video->title = $response->snippet->title;
-            $video->description = $response->snippet->description;
-            $video->tags = isset($response->snippet->tags) ? $response->snippet->tags : [];
-            if (isset($response->snippet->thumbnails->standard)) {
-                $video->thumbnail = $response->snippet->thumbnails->standard->url;
-            }
+        $creating = $video->isDirty();
 
-            $video->save();
+        $video->title = $data->snippet->title;
+        $video->description = $data->snippet->description;
+        $video->tags = isset($data->snippet->tags) ? $data->snippet->tags : [];
+
+        if (isset($data->snippet->thumbnails->standard)) {
+            $video->thumbnail = $data->snippet->thumbnails->standard->url;
         }
+
+        // Ref: <https://laracasts.com/discuss/channels/eloquent/strange-results-of-isdirty-with-casted-boolean>
+        $video->published_at = $this->normalizeDateTime($data->snippet->publishedAt);
+        $video->is_public = ($data->status->privacyStatus == 'public') ? '1' : '0';
+
+        $video->license = $data->status->license;
+
+        if (isset($data->snippet->scheduledStartTime)) {
+            $video->recorded_at = $this->normalizeDate($data->snippet->scheduledStartTime);
+        }
+        if (isset($data->status->lifeCycleStatus)) {
+            $video->broadcast_status = $data->status->lifeCycleStatus;
+        }
+
+        if (isset($data->statistics) && isset($data->statistics->viewCount)) {
+            $video->views = $data->statistics->viewCount;
+        }
+
+        if (isset($data->recordingDetails) && isset($data->recordingDetails->recordingDate)) {
+            //var_dump($data->recordingDetails);
+            $video->recorded_at = $this->normalizeDate($data->recordingDetails->recordingDate);
+        }
+
+        if (isset($data->contentDetails) && isset($data->contentDetails->duration)) {
+            $video->duration = $data->contentDetails->duration;
+        }
+
+        if ($creating) {
+            \Log::info('Adding YouTube video: ' . $data->id);
+        } else if ($video->isDirty()) {
+            \Log::info('Updating YouTube video: ' . $data->id);
+        }
+
+        $video->save();
     }
 
     public function harvestPlaylists()
@@ -66,6 +102,8 @@ class YoutubeHarvestJob extends Job implements SelfHandling
         foreach ($this->getPlaylists() as $response) {
 
             $id = $response->id;
+
+            echo "- " . $response->snippet->title . "\n";
 
             $playlist = \App\YoutubePlaylist::firstOrCreate(['youtube_id' => $id]);
 
@@ -99,6 +137,38 @@ class YoutubeHarvestJob extends Job implements SelfHandling
 
     public function harvestLiveBroadcasts()
     {
+        $client = app('google.api.client');
+        $client->setAccessType('offline');
+        if (\Storage::disk('local')->exists('google_access_token.json')) {
+            $token = \Storage::disk('local')->get('google_access_token.json');
+            $client->setAccessToken($token);
+        }
+
+        $youtube = $client->make('youTube');
+
+        // list buckets example
+//         $videos = $youtube->search->listSearch('snippet', [
+// //            'onBehalfOfContentOwner' => 'UCynaukrA8wxvJOcyFQJN3Jg',
+// //            'forContentOwner' => true,
+// //            'forMine' => true,
+//             'type' => 'video',
+//             'channelId' => 'UCynaukrA8wxvJOcyFQJN3Jg',
+//             'maxResults' => 50,
+//             'order' => 'date',
+//             'eventType' => 'upcoming',
+//         ]);
+
+        $videos = $youtube->liveBroadcasts->listLiveBroadcasts('id,snippet,status', [
+            'broadcastStatus' => 'upcoming',
+            'maxResults' => 50,
+        ]);
+
+        foreach ($videos->items as $broadcast) {
+            echo "- " . $broadcast->snippet->title . "\n";
+            $this->storeVideo($broadcast);
+        }
+
+
         // $client = new \Google_Client();
         // $credentials = $client->loadServiceAccountJson(base_path('google_credentials.json'), [
         //     'https://www.googleapis.com/auth/youtube.readonly',
@@ -116,12 +186,112 @@ class YoutubeHarvestJob extends Job implements SelfHandling
         // $service = new \Google_Service_YouTube($client);
 
         // $part = 'snippet'; # ['id', 'snippet', 'contentDetails', 'status'];
+
+
         // $results = $service->liveBroadcasts->listLiveBroadcasts($part, ['mine' => 'true']);
 
         // var_dump($results);
 
 
         // die;
+    }
+
+    public function harvestCompletedLiveBroadcasts()
+    {
+        $client = app('google.api.client');
+        $client->setAccessType('offline');
+        if (\Storage::disk('local')->exists('google_access_token.json')) {
+            $token = \Storage::disk('local')->get('google_access_token.json');
+            $client->setAccessToken($token);
+        }
+
+        $youtube = $client->make('youTube');
+
+        // list buckets example
+//         $videos = $youtube->search->listSearch('snippet', [
+// //            'onBehalfOfContentOwner' => 'UCynaukrA8wxvJOcyFQJN3Jg',
+// //            'forContentOwner' => true,
+// //            'forMine' => true,
+//             'type' => 'video',
+//             'channelId' => 'UCynaukrA8wxvJOcyFQJN3Jg',
+//             'maxResults' => 50,
+//             'order' => 'date',
+//             'eventType' => 'upcoming',
+//         ]);
+
+        $videos = $youtube->liveBroadcasts->listLiveBroadcasts('id,snippet,status', [
+            'broadcastStatus' => 'completed',
+            'maxResults' => 50,
+        ]);
+
+        foreach ($videos->items as $broadcast) {
+            echo "- " . $broadcast->snippet->title . "\n";
+            $this->storeVideo($broadcast);
+        }
+
+
+        // $client = new \Google_Client();
+        // $credentials = $client->loadServiceAccountJson(base_path('google_credentials.json'), [
+        //     'https://www.googleapis.com/auth/youtube.readonly',
+        //     'https://www.googleapis.com/auth/youtube'
+        // ]);
+        // $client->setAssertionCredentials($credentials);
+        // if ($client->getAuth()->isAccessTokenExpired()) {
+        //     $client->getAuth()->refreshTokenWithAssertion();
+        // }
+
+        // echo "OK";
+
+
+        // $client->setApplicationName("bibsprut");
+        // $service = new \Google_Service_YouTube($client);
+
+        // $part = 'snippet'; # ['id', 'snippet', 'contentDetails', 'status'];
+
+
+        // $results = $service->liveBroadcasts->listLiveBroadcasts($part, ['mine' => 'true']);
+
+        // var_dump($results);
+
+
+        // die;
+    }
+
+    public function harvestVideosFromIds($ids)
+    {
+        print ":: $ids\n";
+        $client = app('google.api.client');
+        $client->setAccessType('offline');
+        if (\Storage::disk('local')->exists('google_access_token.json')) {
+            $token = \Storage::disk('local')->get('google_access_token.json');
+            $client->setAccessToken($token);
+        }
+
+        $youtube = $client->make('youTube');
+
+        // list buckets example
+        $videos = $youtube->videos->listVideos('id,snippet,contentDetails,fileDetails,recordingDetails,status,statistics', [
+           'id' => $ids,
+           'maxResults' => 50,
+        ]);
+
+        foreach ($videos->items as $video) {
+            echo "- " . $video->snippet->title . "\n";
+            $this->storeVideo($video);
+        }
+    }
+
+    public function harvestVideos()
+    {
+        $ids = [];
+        foreach ($this->getUploads() as $response) {
+            $ids[] = $response->contentDetails->videoId;
+            // $response = \Youtube::getVideoInfo($id,
+            //     ['id', 'snippet', 'contentDetails', 'statistics', 'status', 'recordingDetails', 'fileDetails']
+            // );
+            // $this->storeVideo($response);
+        }
+        $this->harvestVideosFromIds(implode(',', $ids));
     }
 
     /**
@@ -131,8 +301,9 @@ class YoutubeHarvestJob extends Job implements SelfHandling
      */
     public function handle()
     {
-        $this->harvestLiveBroadcasts();
+        //$this->harvestCompletedLiveBroadcasts();
+        //$this->harvestLiveBroadcasts();
         $this->harvestVideos();
-        $this->harvestPlaylists();
+        // $this->harvestPlaylists();
     }
 }

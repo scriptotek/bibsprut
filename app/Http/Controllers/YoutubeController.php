@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\YoutubeVideo;
+use Illuminate\Http\Request;
 
 class YoutubeController extends Controller
 {
@@ -14,11 +14,13 @@ class YoutubeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $videos = YoutubeVideo::all();
+        $videos = YoutubeVideo::orderBy('recorded_at', 'desc')->get();
 
-        return response()->view('youtube.index', ['videos' => $videos]);
+        return response()->view('youtube.index', [
+            'videos' => $videos
+        ]);
     }
 
     /**

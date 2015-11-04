@@ -21,6 +21,7 @@ class YoutubeVideo extends Model
      */
     protected $casts = [
         'tags' => 'array',
+        'is_public' => 'boolean',
     ];
 
     /**
@@ -45,4 +46,5 @@ class YoutubeVideo extends Model
         $parser = new \cebe\markdown\GithubMarkdown();
         return $parser->parse($this->description);
     }
+
 }

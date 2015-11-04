@@ -16,7 +16,7 @@
   <!-- List group -->
   <ul class="list-group">
 @foreach ($videos as $video)
-  <li class="list-group-item">
+  <li class="list-group-item{{ !$video->is_public ? ' disabled' : '' }}{{ in_array($video->broadcast_status, ['created','ready']) ? ' list-group-item-warning' : '' }}">
   	<strong>{{ $video['title'] }}</strong>
     <a href="https://www.youtube.com/edit?video_id={{ $video['youtube_id'] }}" style="margin:0 0 0 10px;">
       <i class="zmdi zmdi-link"></i>
@@ -33,6 +33,13 @@
         Arrangement
       </a>
     @endif
+    <div>
+      Recording date: {{ $video->recorded_at ?: '(none)' }},
+      Broadcast status: {{ $video->broadcast_status ?: '(none)' }},
+      Public: {{ $video->is_public ? 'true' : 'false' }},
+      Duration: {{ $video->duration ?: '(none)' }},
+      Views: {{ $video->views }}
+    </div>
 
   	<div>
   	@foreach ($video->tags as $tag)
