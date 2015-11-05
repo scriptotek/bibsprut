@@ -55,17 +55,22 @@ class YoutubeHarvestJob extends Job implements SelfHandling
 
         $video->title = $data->snippet->title;
         $video->description = $data->snippet->description;
-        $video->tags = isset($data->snippet->tags) ? $data->snippet->tags : [];
 
         if (isset($data->snippet->thumbnails->standard)) {
             $video->thumbnail = $data->snippet->thumbnails->standard->url;
         }
 
-        // Ref: <https://laracasts.com/discuss/channels/eloquent/strange-results-of-isdirty-with-casted-boolean>
-        $video->published_at = $this->normalizeDateTime($data->snippet->publishedAt);
+        // If a video, not broadcast
+        if (!isset($data->status->lifeCycleStatus)) {
+            $video->tags = isset($data->snippet->tags) ? $data->snippet->tags : [];
+
+            // Ref: <https://laracasts.com/discuss/channels/eloquent/strange-results-of-isdirty-with-casted-boolean>
+            $video->published_at = $this->normalizeDateTime($data->snippet->publishedAt);
+            $video->license = $data->status->license;
+        }
+
         $video->is_public = ($data->status->privacyStatus == 'public') ? '1' : '0';
 
-        $video->license = $data->status->license;
 
         if (isset($data->snippet->scheduledStartTime)) {
             $video->recorded_at = $this->normalizeDate($data->snippet->scheduledStartTime);
@@ -90,6 +95,7 @@ class YoutubeHarvestJob extends Job implements SelfHandling
         if ($creating) {
             \Log::info('Adding YouTube video: ' . $data->id);
         } else if ($video->isDirty()) {
+            //var_dump($video->getDirty());
             \Log::info('Updating YouTube video: ' . $data->id);
         }
 
@@ -301,9 +307,9 @@ class YoutubeHarvestJob extends Job implements SelfHandling
      */
     public function handle()
     {
-        //$this->harvestCompletedLiveBroadcasts();
-        //$this->harvestLiveBroadcasts();
+        $this->harvestCompletedLiveBroadcasts();
+        $this->harvestLiveBroadcasts();
         $this->harvestVideos();
-        // $this->harvestPlaylists();
+        $this->harvestPlaylists();
     }
 }
