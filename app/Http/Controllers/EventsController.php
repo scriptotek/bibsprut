@@ -107,8 +107,8 @@ class EventsController extends Controller
      */
     public function store(Request $request)
     {
-        $event = new \App\Event();
-        $event->uuid = 'Ikke en UUID';
+        $event = new Event();
+        $event->uuid = Uuid::uuid1()->toString();  // Time-based version1 string (for now)
         $event->title = $request->title;
         $event->description = $request->description;
         $event->vortex_url = $request->vortex_url;

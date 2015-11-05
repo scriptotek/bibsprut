@@ -15,6 +15,7 @@ class CreateEventsTable extends Migration
         Schema::create('events', function(Blueprint $table) {
             //$collection->unique(array('vocabulary', 'identifier'));
             $table->increments('id');
+            $table->string('uuid')->unique();
 
             $table->string('title');
             $table->text('description');
@@ -26,7 +27,6 @@ class CreateEventsTable extends Migration
             $table->string('facebook_id')->nullable();
             $table->string('youtube_playlist_id')->nullable();
 
-            $table->string('uuid')->unique();
             $table->dateTime('unpublished_at');
 
             $table->timestamps();
