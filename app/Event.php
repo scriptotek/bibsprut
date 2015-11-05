@@ -23,6 +23,14 @@ class Event extends Model
         return $this->hasMany('App\Organizer');
     }
 
+    /**
+     * Get the resources for this event.
+     */
+    public function resources()
+    {
+        return $this->hasMany('App\EventResource');
+    }
+
 	public function descriptionAsHtml()
     {
         $parser = new \cebe\markdown\GithubMarkdown();

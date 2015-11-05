@@ -88,26 +88,6 @@
 
     </div>
   </div>
-
-
-<div class="panel panel-default">
-  <div class="panel-heading">Bilder</div>
-  <div class="panel-body">
-
-  <!--
-  <div class="form-group">
-    <label for="exampleInputFile">File input</label>
-    <input type="file" id="exampleInputFile">
-    <p class="help-block">Example block-level help text here.</p>
-  </div>
-  <div class="checkbox">
-    <label>
-      <input type="checkbox"> Check me out
-    </label>
-  </div>
-  -->
-    YouTube-thumbnail, Vortex/Titan-thumbnail... Husk kreditering
-  </div>
 </div>
 
 

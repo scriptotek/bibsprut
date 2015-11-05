@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\Event;
+use App\EventResource;
 use App\Http\Requests;
-use App\Http\Controllers\Controller;
+use App\Presentation;
+use App\YoutubeVideo;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Ramsey\Uuid\Uuid;
 
 class EventsController extends Controller
 {
@@ -25,7 +27,7 @@ class EventsController extends Controller
 
     public function scrapeYouTubePage($youtubeId, &$data)
     {
-        $video = \App\YoutubeVideo::findOrFail($youtubeId);
+        $video = YoutubeVideo::findOrFail($youtubeId);
         $data['p1_youtube_id'] = $video->youtube_id;
         $data['title'] = $video->title;
         $data['description'] = $video->description;
@@ -118,7 +120,7 @@ class EventsController extends Controller
 
         // Organizers: TODO
 
-        $presentation = new \App\Presentation();
+        $presentation = new Presentation();
         $presentation->event_id = $event->id;
         $presentation->start_time = $request->p1_start_time;
         $presentation->end_time = $request->p1_end_time;
@@ -130,7 +132,7 @@ class EventsController extends Controller
         }
 
         if ($request->has('p1_youtube_id')) {
-            $video = \App\YoutubeVideo::where('youtube_id', '=', $request->p1_youtube_id)->first();
+            $video = YoutubeVideo::where('youtube_id', '=', $request->p1_youtube_id)->first();
             if (is_null($video)) {
                 die("TODO: Video not found, redirect back with meaningful error message");
             }
@@ -143,6 +145,77 @@ class EventsController extends Controller
     }
 
     /**
+     * Display edit form for the resources
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function editResources($id)
+    {
+        $event = Event::findOrFail($id);
+        $data = [
+            'event' => $event,
+            'resources' => $event->resources,
+        ];
+        return response()->view('events.resources', $data);
+    }
+
+    public function updateResources($id, Request $request)
+    {
+        $event = Event::findOrFail($id);
+        foreach ($event->resources as $resource) {
+            if ($request->has('attribution_' . $resource->id)) {
+                $resource->attribution = $request->get('attribution_' . $resource->id);
+            }
+            if ($request->has('license_' . $resource->id)) {
+                $resource->license = $request->get('license_' . $resource->id);
+            }
+            $resource->save();
+        }
+        return redirect()->action('EventsController@editResources', $event->id)
+            ->with('status', 'Lagret.');
+
+    }
+
+    public function storeResource($id, Request $request)
+    {
+
+        $event = Event::findOrFail($id);
+
+        $this->validate($request, [
+            'file' => 'image|max:10000',
+        ]);
+        $file = $request->file('file');
+
+        if ($file->isValid()) {
+
+            $destination_path = public_path('uploads');
+
+            list($width, $height, $type, $attr) = getimagesize($file->getPathname());
+
+            $resource = $event->resources()->create([
+                'original_filename' => $file->getClientOriginalName(),
+                'mime' => $file->getMimeType(),
+                'filetype' => 'image',
+                'width' => $width,
+                'height' => $height,
+            ]);
+
+            $extension  = $file->guessExtension();
+            $filename = sha1($resource->id) . '.' . $extension;
+            $request->file('file')->move($destination_path, $filename);
+
+
+            $resource->filename = $filename;
+            $resource->save();
+
+            return response()->json($resource->id, 200);
+        } else {
+            return response()->json('errors', 400);
+        }
+    }
+
+    /**
      * Display the specified resource.
      *
      * @param  int  $id
@@ -150,7 +223,7 @@ class EventsController extends Controller
      */
     public function show($id)
     {
-        $event = \App\Event::findOrFail($id);
+        $event = Event::findOrFail($id);
 
         $vortex = app('webdav')->get($event->vortex_url);
         // print_r($vortex);die;

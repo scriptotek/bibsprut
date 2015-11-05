@@ -6,6 +6,7 @@
 
 <p>
 	<a href="{{ action('EventsController@edit', $event->id) }}">[Rediger]</a>
+  <a href="{{ action('EventsController@editResources', $event->id) }}">[Ressurser]</a>
 </p>
 
 <p>
@@ -33,8 +34,9 @@
         <div style="padding:3px;">{!! isset($vortex->properties->caption) ? $vortex->properties->caption : ''  !!}</div>
       </div>
 
-    	Fra: {{ $vortex->properties->{"start-date"} }}. Til: {{ isset($vortex->properties->{"end-date"}) ? $vortex->properties->{"end-date"} : '???' }}<br>
-  	Sted: <a href="{{ $vortex->properties->mapurl }}">{{ $vortex->properties->location }}</a>
+    	Fra: {{ $vortex->properties->{"start-date"} }}.
+        Til: {{ isset($vortex->properties->{"end-date"}) ? $vortex->properties->{"end-date"} : '???' }}<br>
+  	    Sted: <a href="{{ $vortex->properties->mapurl }}">{{ $vortex->properties->location }}</a>
   	<br>
     	Organisert av:
 

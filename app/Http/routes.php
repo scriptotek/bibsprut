@@ -23,5 +23,8 @@ Route::group(['middleware' => 'oauth.google'], function () {
     Route::get('/oauth2callback', function() {
         return Redirect::to('/youtube');
     });
+	Route::get('events/{id}/resources', 'EventsController@editResources');
+	Route::post('events/{id}/resources/store', 'EventsController@storeResource');
+	Route::post('events/{id}/resources', 'EventsController@updateResources');
 
 });
