@@ -6,7 +6,8 @@ use App\Event;
 use App\EventResource;
 use App\Http\Requests;
 use App\Presentation;
-use App\YoutubeVideo;
+use App\Recording;
+use App\YoutubePlaylist;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
@@ -27,32 +28,41 @@ class EventsController extends Controller
 
     public function scrapeYouTubePage($youtubeId, &$data)
     {
-        $video = YoutubeVideo::findOrFail($youtubeId);
-        $data['p1_youtube_id'] = $video->youtube_id;
-        $data['title'] = $video->title;
-        $data['description'] = $video->description;
+        $recording = Recording::findOrFail($youtubeId);
+        $data['p1_youtube_id'] = $recording->youtube_id;
+        $data['title'] = array_get($recording->youtube_meta, 'title');
+        $data['description'] = array_get($recording->youtube_meta, 'description');
     }
 
-    public function scrapeVortexPage(&$data)
+    public function vortexUrlFromText($text)
     {
         $vortex_pattern1 = '/(https?:\/\/www.ub.uio.no\/om\/aktuelt\/arrangementer\/[^\s]+)/';
         $vortex_pattern2 = '/(https?:\/\/www.ub.uio.no\/english\/about\/news-and-events\/events\/[^\s]+)/';
-        $fb_pattern = '/https?:\/\/www\.facebook\.com\/events\/([0-9]+)/';
-
-        if (!preg_match($vortex_pattern1, $data['description'], $matches)) {
-            if (!preg_match($vortex_pattern2, $data['description'], $matches)) {
-                return;
+        if (!preg_match($vortex_pattern1, $text, $matches)) {
+            if (!preg_match($vortex_pattern2, $text, $matches)) {
+                return null;
             }
         }
+        return $matches[1];
+    }
 
-        $data['vortex_url'] = $matches[1];
-        $data['description'] = preg_replace($vortex_pattern1, '', $data['description']);
-        $data['description'] = preg_replace($vortex_pattern2, '', $data['description']);
+    public function scrapeVortexPage(&$data, $url)
+    {
+        // Ex: http://bibsprut-dev.net:8000/events/create?from_vortex=http://www.ub.uio.no/om/aktuelt/arrangementer/ureal/science-debate/2015/biokonferansen2015.html
+        $fb_pattern = '/https?:\/\/www\.facebook\.com\/events\/([0-9]+)/';
 
-        $data['description'] = preg_replace('/\n\n\n/', "\n\n", $data['description']);
-        $data['description'] = preg_replace('/\n\n\n/', "\n\n", $data['description']);
+        $data['vortex_url'] = $url;
+        // $data['description'] = preg_replace($vortex_pattern1, '', $data['description']);
+        // $data['description'] = preg_replace($vortex_pattern2, '', $data['description']);
+
+        // $data['description'] = preg_replace('/\n\n\n/', "\n\n", $data['description']);
+        // $data['description'] = preg_replace('/\n\n\n/', "\n\n", $data['description']);
 
         $vortex = app('webdav')->get($data['vortex_url']);
+
+        $data['title'] = $vortex->properties->title;
+        $data['description'] = strip_tags($vortex->properties->content);
+        $data['location'] = $vortex->properties->location;
 
         if (isset($vortex->properties->{'start-date'})) {
             $dts = explode(' ', $vortex->properties->{'start-date'});
@@ -71,6 +81,15 @@ class EventsController extends Controller
 
     }
 
+    public function getYoutubePlaylists()
+    {
+        $youtubePlaylists = ['0' => '(Ingen spilleliste)'];
+        foreach (YoutubePlaylist::all() as $pl) {
+            $youtubePlaylists[$pl->id] = $pl->title;
+        }
+        return $youtubePlaylists;
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -79,12 +98,16 @@ class EventsController extends Controller
     public function create(Request $request)
     {
         $data = [
+            'uuid' => '',
             'title' => '',
+            'intro' => '',
             'description' => '',
             'vortex_url' => '',
             'facebook_id' => '',
-            'youtube_playlist_id' => '',
+            'youtube_playlist_id' => -1,
+            'youtube_playlists' => $this->getYoutubePlaylists(),
             'start_date' => '',
+            'location' => 'Realfagsbiblioteket',
 
             'p1_youtube_id' => '',
             'p1_youtube_create' => true,
@@ -92,11 +115,21 @@ class EventsController extends Controller
             'p1_start_time' => '15:00',
             'p1_end_time' => '16:00',
         ];
-        if ($request->has('from_youtube_video')) {
+        if ($request->has('from_recording')) {
             $data['p1_youtube_create'] = false;
-            $this->scrapeYouTubePage($request->get('from_youtube_video'), $data);
-            $this->scrapeVortexPage($data);
+            $this->scrapeYouTubePage($request->get('from_recording'), $data);
+            $vortexUrl = $this->vortexUrlFromText($data['description']);
+            if (!is_null($vortexUrl)) {
+                $this->scrapeVortexPage($data, $vortexUrl);
+            }
             $data['description'] = trim($data['description']);
+        }
+        if ($request->has('from_vortex')) {
+            // Make sure it's actually a vortex url:
+            $vortexUrl = $this->vortexUrlFromText($request->get('from_vortex'));
+            if (!is_null($vortexUrl)) {
+                $this->scrapeVortexPage($data, $vortexUrl);
+            }
         }
         return response()->view('events.create', $data);
     }
@@ -112,10 +145,20 @@ class EventsController extends Controller
         $event = new Event();
         $event->uuid = Uuid::uuid1()->toString();  // Time-based version1 string (for now)
         $event->title = $request->title;
+        $event->intro = $request->intro;
         $event->description = $request->description;
         $event->vortex_url = $request->vortex_url;
         $event->facebook_id = $request->facebook_id;
         $event->start_date = new Carbon($request->start_date);
+        $event->location = $request->location;
+
+        if (!$request->youtube_playlist_id) {
+            $event->youtube_playlist_id = null;
+        } else {
+            $youtubePlaylist = YoutubePlaylist::find($request->youtube_playlist_id);
+            $event->youtube_playlist_id = $youtubePlaylist->id;
+        }
+
         $event->save();
 
         // Organizers: TODO
@@ -132,12 +175,12 @@ class EventsController extends Controller
         }
 
         if ($request->has('p1_youtube_id')) {
-            $video = YoutubeVideo::where('youtube_id', '=', $request->p1_youtube_id)->first();
-            if (is_null($video)) {
+            $recording = Recording::where('youtube_id', '=', $request->p1_youtube_id)->first();
+            if (is_null($recording)) {
                 die("TODO: Video not found, redirect back with meaningful error message");
             }
-            $video->presentation_id = $presentation->id;
-            $video->save();
+            $recording->presentation_id = $presentation->id;
+            $recording->save();
         }
 
         return redirect()->action('EventsController@show', $event->id)
@@ -203,8 +246,19 @@ class EventsController extends Controller
 
             $extension  = $file->guessExtension();
             $filename = sha1($resource->id) . '.' . $extension;
-            $request->file('file')->move($destination_path, $filename);
 
+            // \Storage::disk('cloud')->put(, file_get_contents($file->getPathname()) );
+
+            $response = app('webdav')->put(
+                'om/aktuelt/arrangementer/ureal/bilder/' . $filename,
+                file_get_contents($file->getPathname())
+            );
+
+            if (!$response) {
+                return response()->json('WebDav storage failed', 400);
+            }
+
+            $request->file('file')->move($destination_path, $filename);
 
             $resource->filename = $filename;
             $resource->save();
@@ -244,19 +298,87 @@ class EventsController extends Controller
      */
     public function edit($id)
     {
-        die('neeeei');
+        $event = Event::findOrFail($id);
+        $p1 = $event->presentations[0];
+
+        $data = [
+            'uuid' => $event->uuid,
+            'id' => $event->id,
+            'title' => $event->title,
+            'intro' => $event->intro,
+            'description' => $event->description,
+            'vortex_url' => $event->vortex_url,
+            'facebook_id' => $event->facebook_id,
+            'youtube_playlists' => $this->getYoutubePlaylists(),
+            'youtube_playlist_id' => $event->youtube_playlist_id,
+            'start_date' => $event->start_date,
+            'location' => $event->location,
+
+            'p1_youtube_id' => isset($p1->recording) ? $p1->recording->youtube_id : '',
+            'p1_youtube_create' => false,
+            'p1_person1' => '',
+            'p1_start_time' => $p1->start_time,
+            'p1_end_time' => $p1->end_time,
+        ];
+
+        return response()->view('events.create', $data);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update($id, Request $request)
     {
-        //
+        $event = Event::findOrFail($id);
+        $event->title = $request->title;
+        $event->intro = $request->intro;
+        $event->description = $request->description;
+        $event->vortex_url = $request->vortex_url;
+        $event->facebook_id = $request->facebook_id;
+        $event->start_date = new Carbon($request->start_date);
+        $event->location = $request->location;
+        if (!$request->youtube_playlist_id) {
+            $event->youtube_playlist_id = null;
+        } else {
+            $youtubePlaylist = YoutubePlaylist::find($request->youtube_playlist_id);
+            $event->youtube_playlist_id = $youtubePlaylist->id;
+        }
+        $event->save();
+
+        // Organizers: TODO
+
+        $p1 = $event->presentations[0];
+        $p1->start_time = $request->p1_start_time;
+        $p1->end_time = $request->p1_end_time;
+        // ...
+        $p1->save();
+
+        if ($request->has('p1_person1')) {
+            // TODO
+        }
+
+        if ($request->has('p1_youtube_id')) {
+            $recording = Recording::where('presentation_id', '=', $p1->id)->first();
+            if (!is_null($recording)) {
+                if ($recording->id != $request->p1_youtube_id) {
+                    $recording->presentation_id = null;
+                }
+            }
+
+            $recording = Recording::where('youtube_id', '=', $request->p1_youtube_id)->first();
+            if (is_null($recording)) {
+                die("TODO: Video not found, redirect back with meaningful error message");
+            }
+            $recording->presentation_id = $p1->id;
+            $recording->save();
+        }
+
+        return redirect()->action('EventsController@show', $event->id)
+            ->with('status', 'Arrangementet ble oppdatert.');
     }
 
     /**

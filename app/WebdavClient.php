@@ -13,7 +13,7 @@ class WebdavClient extends Model
     /**
      * Constructor
      *
-     * @param array $config
+     * @param Client $client
      */
     public function __construct(Client $client)
     {
@@ -26,5 +26,11 @@ class WebdavClient extends Model
         $response = $this->client->request('GET', $rest);
 
         return json_decode($response['body']);
+    }
+
+    public function put($url, $body)
+    {
+        $response = $this->client->request('PUT', $url, $body);
+        return ($response['statusCode'] == 201);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Presentation extends Model
@@ -25,12 +26,20 @@ class Presentation extends Model
     }
 
     /**
-     * Get the video from the presentation.
+     * Get the recording from the presentation.
      */
-    public function video()
+    public function recording()
     {
-        return $this->hasOne('App\YoutubeVideo');
+        return $this->hasOne('App\Recording');
     }
+
+    /**
+     * Get the slides from the presentation.
+     */
+    // public function slides()
+    // {
+    //     return $this->hasOne('App\Slides');
+    // }
 
     /**
      * Get the start time without seconds
@@ -52,5 +61,10 @@ class Presentation extends Model
     public function getEndTimeAttribute($value)
     {
         return preg_replace('/:00$/', '', $value);
+    }
+
+    public function getStartDateTime()
+    {
+        return new Carbon($this->event->start_date . ' ' . $this->start_time, 'Europe/Oslo');
     }
 }

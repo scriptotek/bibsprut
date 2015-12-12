@@ -18,14 +18,20 @@ class CreateEventsTable extends Migration
             $table->string('uuid')->unique();
 
             $table->string('title');
+            $table->text('intro');
             $table->text('description');
             $table->jsonb('tags');
             $table->string('thumbnail');
             $table->date('start_date');
+            $table->string('archive_dir');
+
+            $table->string('twitter_hashtag');
 
             $table->string('vortex_url')->nullable();
             $table->string('facebook_id')->nullable();
-            $table->string('youtube_playlist_id')->nullable();
+
+            $table->string('location')->nullable();
+            $table->string('location_map_url')->nullable();
 
             $table->dateTime('unpublished_at');
 

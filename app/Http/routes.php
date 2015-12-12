@@ -12,13 +12,13 @@
 */
 
 Route::get('/', function() {
-	return Redirect::to('/youtube');
+	return Redirect::to('/recordings');
 });
 
 
 Route::group(['middleware' => 'oauth.google'], function () {
 
-	Route::get('/youtube', 'YoutubeController@index');
+	Route::get('/recordings', 'RecordingsController@index');
 	Route::resource('events', 'EventsController');
     Route::get('/oauth2callback', function() {
         return Redirect::to('/youtube');
@@ -26,5 +26,6 @@ Route::group(['middleware' => 'oauth.google'], function () {
 	Route::get('events/{id}/resources', 'EventsController@editResources');
 	Route::post('events/{id}/resources/store', 'EventsController@storeResource');
 	Route::post('events/{id}/resources', 'EventsController@updateResources');
+	Route::post('events/{id}', 'EventsController@update');
 
 });

@@ -49,81 +49,63 @@ class YoutubeHarvestJob extends Job implements SelfHandling
 
     public function storeVideo($data)
     {
-        $video = \App\YoutubeVideo::firstOrNew(['youtube_id' => $data->id]);
+        $recording = \App\Recording::firstOrNew(['youtube_id' => $data->id]);
 
-        $creating = $video->isDirty();
+        $creating = $recording->isDirty();
+        $meta = $recording->youtube_meta ?: [];
 
-        $video->title = $data->snippet->title;
-        $video->description = $data->snippet->description;
+        if ($creating) {
+            $meta['tags'] = [];
+        }
+
+        $meta['title'] = $data->snippet->title;
+        $meta['description'] = $data->snippet->description;
 
         if (isset($data->snippet->thumbnails->standard)) {
-            $video->thumbnail = $data->snippet->thumbnails->standard->url;
+            $meta['thumbnail'] = $data->snippet->thumbnails->standard->url;
         }
 
         // If a video, not broadcast
         if (!isset($data->status->lifeCycleStatus)) {
-            $video->tags = isset($data->snippet->tags) ? $data->snippet->tags : [];
+            $meta['tags'] = isset($data->snippet->tags) ? $data->snippet->tags : [];
 
             // Ref: <https://laracasts.com/discuss/channels/eloquent/strange-results-of-isdirty-with-casted-boolean>
-            $video->published_at = $this->normalizeDateTime($data->snippet->publishedAt);
-            $video->license = $data->status->license;
+            $meta['published_at'] = $this->normalizeDateTime($data->snippet->publishedAt);
+            $meta['license'] = $data->status->license;
         }
 
-        $video->is_public = ($data->status->privacyStatus == 'public') ? '1' : '0';
-
+        $meta['is_public'] = ($data->status->privacyStatus == 'public');
 
         if (isset($data->snippet->scheduledStartTime)) {
-            $video->recorded_at = $this->normalizeDate($data->snippet->scheduledStartTime);
+            $recording->recorded_at = $this->normalizeDate($data->snippet->scheduledStartTime);
         }
         if (isset($data->status->lifeCycleStatus)) {
-            $video->broadcast_status = $data->status->lifeCycleStatus;
+            $meta['broadcast_status'] = $data->status->lifeCycleStatus;
         }
 
         if (isset($data->statistics) && isset($data->statistics->viewCount)) {
-            $video->views = $data->statistics->viewCount;
+            $meta['views'] = $data->statistics->viewCount;
         }
 
         if (isset($data->recordingDetails) && isset($data->recordingDetails->recordingDate)) {
             //var_dump($data->recordingDetails);
-            $video->recorded_at = $this->normalizeDate($data->recordingDetails->recordingDate);
+            $recording->recorded_at = $this->normalizeDate($data->recordingDetails->recordingDate);
         }
 
         if (isset($data->contentDetails) && isset($data->contentDetails->duration)) {
-            $video->duration = $data->contentDetails->duration;
+            $meta['duration'] = $data->contentDetails->duration;
         }
 
         if ($creating) {
             \Log::info('Adding YouTube video: ' . $data->id);
-        } else if ($video->isDirty()) {
-            //var_dump($video->getDirty());
+        } else if ($recording->isDirty()) {
+            //var_dump($recording->getDirty());
             \Log::info('Updating YouTube video: ' . $data->id);
         }
 
-        $video->save();
-    }
+        $recording->youtube_meta = $meta;
 
-    public function harvestPlaylists()
-    {
-        $ids = [];
-        foreach ($this->getPlaylists() as $response) {
-
-            $id = $response->id;
-
-            echo "- " . $response->snippet->title . "\n";
-
-            $playlist = \App\YoutubePlaylist::firstOrCreate(['youtube_id' => $id]);
-
-            $playlist->is_public = ($response->status->privacyStatus == 'public');
-            $playlist->title = $response->snippet->title;
-            $playlist->description = $response->snippet->description;
-
-            $playlist->save();
-
-            $this->harvestPlaylistVideos($id);
-            $ids[] = $id;
-        }
-
-        // TODO: Delete any playlists in DB with youtube_id NOT IN $ids
+        $recording->save();
     }
 
     public function harvestPlaylistVideos($playlistId)
@@ -132,9 +114,9 @@ class YoutubeHarvestJob extends Job implements SelfHandling
         $playlist = \App\YoutubePlaylist::where('youtube_id', '=', $playlistId)->firstOrFail();
         foreach ($this->getPlaylistVideos($playlistId) as $response) {
             $videoId = $response->snippet->resourceId->videoId;
-            $video = \App\YoutubeVideo::where('youtube_id', '=', $videoId)->first();
-            if (!is_null($video)) {
-                $video_ids[$video->id] = ['playlist_position' => $response->snippet->position];
+            $recording = \App\Recording::where('youtube_id', '=', $videoId)->first();
+            if (!is_null($recording)) {
+                $video_ids[$recording->id] = ['playlist_position' => $response->snippet->position];
             }
         }
 
@@ -263,9 +245,8 @@ class YoutubeHarvestJob extends Job implements SelfHandling
         // die;
     }
 
-    public function harvestVideosFromIds($ids)
+    protected function getYoutubeClient()
     {
-        print ":: $ids\n";
         $client = app('google.api.client');
         $client->setAccessType('offline');
         if (\Storage::disk('local')->exists('google_access_token.json')) {
@@ -273,31 +254,126 @@ class YoutubeHarvestJob extends Job implements SelfHandling
             $client->setAccessToken($token);
         }
 
-        $youtube = $client->make('youTube');
+        return $client->make('youTube');
+    }
+
+//    public function harvestVideos()
+//    {
+//        $ids = [];
+//        foreach ($this->getUploads() as $response) {
+//            $ids[] = $response->contentDetails->videoId;
+//            // $response = \Youtube::getVideoInfo($id,
+//            //     ['id', 'snippet', 'contentDetails', 'statistics', 'status', 'recordingDetails', 'fileDetails']
+//            // );
+//            // $this->storeVideo($response);
+//        }
+//        $this->harvestVideosFromIds(implode(',', $ids));
+//    }
+
+    public function harvestVideosFromIds($ids)
+    {
+        // print ":: $ids\n";
+        $youtube = $this->getYoutubeClient();
 
         // list buckets example
-        $videos = $youtube->videos->listVideos('id,snippet,contentDetails,fileDetails,recordingDetails,status,statistics', [
-           'id' => $ids,
-           'maxResults' => 50,
-        ]);
+        $chunks = array_chunk($ids, 50);
+        $videos = [];
+        foreach ($chunks as $ids) {
+            $response = $youtube->videos->listVideos('id,snippet,contentDetails,fileDetails,recordingDetails,status,statistics', [
+                'id' => implode(',', $ids),
+                'maxResults' => 50,
+            ]);
+            $videos = array_merge($videos, $response->items);
+        }
 
-        foreach ($videos->items as $video) {
+        foreach ($videos as $video) {
             echo "- " . $video->snippet->title . "\n";
             $this->storeVideo($video);
         }
     }
 
+    protected function search($params)
+    {
+        $youtube = $this->getYoutubeClient();
+        $params['maxResults'] = 50;
+        $videos = [];
+
+        do {
+            $response = $youtube->search->listSearch('id', $params);
+            $videos = array_merge($videos, $response->items);
+            if ($response->nextPageToken) {
+                $params['pageToken'] = $response->nextPageToken;
+            }
+        } while ($response->nextPageToken);
+
+        return $videos;
+    }
+
+    protected function playlists($params)
+    {
+        $youtube = $this->getYoutubeClient();
+        $params['maxResults'] = 50;
+        $playlists = [];
+
+        do {
+            $response = $youtube->playlists->listPlaylists('id,snippet,status', $params);
+            $playlists = array_merge($playlists, $response->items);
+            if ($response->nextPageToken) {
+                $params['pageToken'] = $response->nextPageToken;
+            }
+        } while ($response->nextPageToken);
+
+        return $playlists;
+    }
+
+    /*
+     * Harvest all videos, both private and public
+     */
     public function harvestVideos()
     {
+        $videos = $this->search([
+            'forMine' => true,
+            'type' => 'video'
+        ]);
+
         $ids = [];
-        foreach ($this->getUploads() as $response) {
-            $ids[] = $response->contentDetails->videoId;
-            // $response = \Youtube::getVideoInfo($id,
-            //     ['id', 'snippet', 'contentDetails', 'statistics', 'status', 'recordingDetails', 'fileDetails']
-            // );
-            // $this->storeVideo($response);
+        foreach ($videos as $video) {
+            $ids[] = $video->id->videoId;
+//            echo "- " . $video->snippet->title . "\n";
+            // $this->storeVideo($video);
         }
-        $this->harvestVideosFromIds(implode(',', $ids));
+        $this->harvestVideosFromIds($ids);
+    }
+
+    /*
+     * Harvest all videos, both private and public
+     */
+    public function harvestPlaylists()
+    {
+        $items = $this->playlists([
+            'mine' => true
+        ]);
+
+        $ids = [];
+        foreach ($items as $response) {
+
+            $id = $response->id;
+
+            echo "- " . $response->snippet->title . "\n";
+
+            $playlist = \App\YoutubePlaylist::firstOrCreate(['youtube_id' => $id]);
+
+            $playlist->is_public = ($response->status->privacyStatus == 'public');
+            $playlist->title = $response->snippet->title;
+            $playlist->description = $response->snippet->description;
+
+            $playlist->save();
+
+            $this->harvestPlaylistVideos($id);
+            $ids[] = $id;
+        }
+
+        // TODO: Delete any playlists in DB with youtube_id NOT IN $ids
     }
 
     /**

@@ -143,6 +143,7 @@ return [
         Alaouy\Youtube\YoutubeServiceProvider::class,
         GrahamCampbell\Markdown\MarkdownServiceProvider::class,
         PulkitJalan\Google\GoogleServiceProvider::class,
+        Collective\Html\HtmlServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -152,6 +153,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\WebdavServiceProvider::class,
+        // App\Providers\AppFilesystemServiceProvider::class,
 
     ],
 
@@ -202,8 +204,8 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View'      => Illuminate\Support\Facades\View::class,
         'Markdown'  => GrahamCampbell\Markdown\Facades\Markdown::class,
-        'Google'    => PulkitJalan\Google\Facades\Google::class
-
+        'Google'    => PulkitJalan\Google\Facades\Google::class,
+        'Form'      => Collective\Html\FormFacade::class,
     ],
 
 ];

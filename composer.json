@@ -10,12 +10,14 @@
         "alaouy/youtube": "~1.2",
         "graham-campbell/markdown": "~5.1",
         "cebe/markdown": "~1.0.1",
-        "sabre/dav": "~3.0",
+        "sabre/dav": "~2.0",
         "pulkitjalan/google-apiclient": "~2.0",
         "zendframework/zend-feed": "^2.5",
         "zendframework/zend-servicemanager": "^2.6",
         "ramsey/uuid": "~3.0",
-        "php-ffmpeg/php-ffmpeg": "0.6.*"
+        "php-ffmpeg/php-ffmpeg": "0.6.*",
+        "league/flysystem-webdav": "~1.0",
+        "laravelcollective/html": "5.1.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

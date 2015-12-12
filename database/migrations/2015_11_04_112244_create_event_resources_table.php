@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEventResources extends Migration
+class CreateEventResourcesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -28,7 +28,8 @@ class CreateEventResources extends Migration
             $table->timestamps();
 
             $table->foreign('event_id')
-                ->references('id')->on('events');
+                ->references('id')->on('events')
+                ->onDelete('cascade');
 
         });
     }

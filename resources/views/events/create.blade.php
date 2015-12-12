@@ -2,9 +2,13 @@
 
 @section('content')
 
-<h2>Nytt arrangement</h2>
+@if (isset($id))
+  <h2>Rediger arrangement</h2>
+@else
+  <h2>Nytt arrangement</h2>
+@endif
 
-<form method="POST" action="{{ action('EventsController@store') }}" class="form-horizontal">
+<form method="POST" action="{{ isset($id) ? action('EventsController@update', $id) : action('EventsController@store') }}" class="form-horizontal">
   {!! csrf_field() !!}
 
   <div class="panel panel-default">
@@ -19,15 +23,26 @@
           </div>
 
           <div class="form-group">
-            <label for="inputDescription" class="col-sm-2 control-label">Beskrivelse</label>
+            <div class="col-sm-2" style="text-align:right;">
+              <label for="inputIntro" class="control-label">Teaser</label>
+              <div><a href="https://daringfireball.net/projects/markdown/" target="_blank">?  Markdown</a></div>
+              <div><span id="ccIntro"></span> tegn, <span id="wcIntro"></span> ord</div>
+            </div>
             <div class="col-sm-10">
-              <textarea class="form-control" rows="10" name="description" id="inputDescription" placeholder="Beskrivelse">{{ old('description') ?: $description }}</textarea>
+              <textarea class="form-control" rows="6" name="intro" id="inputIntro" placeholder="Teaser">{{ old('intro') ?: $intro }}</textarea>
             </div>
           </div>
 
-          <p>
-            (Trenger vi både kort og lang beskrivelse?)
-          </p>
+          <div class="form-group">
+            <div class="col-sm-2" style="text-align:right;">
+              <label for="inputDescription" class="control-label">Beskrivelse</label>
+              <div><a href="https://daringfireball.net/projects/markdown/" target="_blank">? Markdown</a></div>
+              <div><span id="ccDescription"></span> tegn, <span id="wcDescription"></span> ord</div>
+            </div>
+            <div class="col-sm-10">
+              <textarea class="form-control" rows="14" name="description" id="inputDescription" placeholder="Beskrivelse">{{ old('description') ?: $description }}</textarea>
+            </div>
+          </div>
 
           <p>
             (Tittel og beskrivelse på engelsk også?)
@@ -39,6 +54,13 @@
               <div class="input-group date">
                 <input type="text" class="form-control" name="start_date" id="inputStartDate" value="{{ old('start_date') ?: $start_date }}"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
               </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="inputLocation" class="col-sm-2 control-label">Sted</label>
+            <div class="col-sm-7">
+              <input type="text" class="form-control" name="location" id="inputLocation" value="{{ old('location') ?: $location }}">
             </div>
           </div>
 
@@ -69,13 +91,18 @@
           <div class="form-group">
             <label for="inputYouTubePlayList" class="col-sm-2 control-label">YouTube</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" name="youtube_playlist_id" id="inputYouTubePlayList" placeholder="Playlist ID" value="{{ old('youtube_playlist_id') ?: $youtube_playlist_id }}">
+
+              {!! Form::select('youtube_playlist_id',
+                $youtube_playlists,
+                old('youtube_playlist_id') ?: $youtube_playlist_id,
+              ['class' => 'form-control', 'id' => 'inputYouTubePlayList']
+              ) !!}
             </div>
           </div>
 
           <div class="form-group">
             <label class="col-sm-2 control-label">Titan</label>
-            <div class="col-sm-10">
+            <div class="col-sm-10 help-block">
               Tja… trenger man å velge noe aktivt?
               <!--<div class="checkbox">
                 <label>
@@ -84,10 +111,18 @@
                 </label>
               </div>
             </div>-->
+            </div>
           </div>
 
+          <div class="form-group">
+            <label class="col-sm-2 control-label">Identifier</label>
+            <div class="col-sm-10 help-block">
+                {{ $uuid ?: '(not set yet)' }}
+            </div>
+          </div>
+
+
     </div>
-  </div>
 </div>
 
 
@@ -112,7 +147,7 @@
                   <li><a href="#">tilfeldig person</a></li>
                 </ul>
             </div><!-- /input-group-btn -->
-            <input type="text" class="form-control" name="p1_person1" id="inputPerson1" placeholder="Navn (forslag fra BARE, VIAF, ISNI, Wikidata, Cristin?)" value="{{ old('p1_person1') ?: $p1_person1 }}">
+            <input disabled="disabled" type="text" class="form-control" name="p1_person1" id="inputPerson1" placeholder="Navn (forslag fra BARE, VIAF, ISNI, Wikidata, Cristin?)" value="{{ old('p1_person1') ?: $p1_person1 }}">
           </div>
       </div>
     </div>
@@ -181,6 +216,19 @@ $(function() {
     language: "no",
     autoclose: true
   });
+
+  function introWc() {
+    $('#ccIntro').text($('#inputIntro').val().length);
+    $('#wcIntro').text(($('#inputIntro').val().match(/\S+/g) || []).length);
+  }
+  function descriptionWc() {
+    $('#ccDescription').text($('#inputDescription').val().length);
+    $('#wcDescription').text(($('#inputDescription').val().match(/\S+/g) || []).length);
+  }
+  $('#inputIntro').on('input', introWc);
+  $('#inputDescription').on('input', descriptionWc);
+  introWc();
+  descriptionWc();
 
 });
 

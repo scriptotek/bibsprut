@@ -24,11 +24,14 @@ class CreatePresentationsTable extends Migration
             $table->jsonb('tags');
             $table->string('thumbnail');
 
+            $table->string('archive_dir');
+
             $table->integer('event_id')->unsigned()->nullable();
             $table->timestamps();
 
             $table->foreign('event_id')
-                ->references('id')->on('events');
+                ->references('id')->on('events')
+                ->onDelete('cascade');
         });
     }
 

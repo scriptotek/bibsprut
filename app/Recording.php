@@ -5,15 +5,15 @@ namespace App;
 use cebe\markdown\GithubMarkdown;
 use Illuminate\Database\Eloquent\Model;
 
-class YoutubeVideo extends Model
+class Recording extends Model
 {
 
-    /**
+	/**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = ['youtube_id', 'title', 'description', 'tags', 'thumbnail', 'published_at'];
+    protected $fillable = ['youtube_id', 'youtube_meta', 'duration'];
 
     /**
      * The attributes that should be casted to native types.
@@ -21,8 +21,7 @@ class YoutubeVideo extends Model
      * @var array
      */
     protected $casts = [
-        'tags' => 'array',
-        'is_public' => 'boolean',
+        'youtube_meta' => 'array',
     ];
 
     /**
@@ -42,13 +41,13 @@ class YoutubeVideo extends Model
         return $this->belongsTo('App\Presentation');
     }
 
-    public function descriptionAsHtml()
+    public function youtubeDescriptionAsHtml()
     {
         $parser = new GithubMarkdown();
-        return $parser->parse($this->description);
+        return $parser->parse(array_get($this->youtube_meta, 'description'));
     }
 
-    public function link($method='watch')
+    public function youtubeLink($method='watch')
     {
         $host = 'https://www.youtube.com';
         switch ($method) {
@@ -63,4 +62,8 @@ class YoutubeVideo extends Model
         }
     }
 
+    // public function duration()
+    // {
+        
+    // }
 }

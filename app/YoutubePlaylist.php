@@ -19,8 +19,16 @@ class YoutubePlaylist extends Model
      */
     public function videos()
     {
-        return $this->belongsToMany('App\YoutubeVideo', 'youtube_playlist_videos')
+        return $this->belongsToMany('App\Recording', 'youtube_playlist_videos')
             ->withPivot('playlist_position');
+    }
+
+    /**
+     * Get the event for this YouTube playlist, if any.
+     */
+    public function event()
+    {
+        return $this->hasOne('App\Event');
     }
 
 }

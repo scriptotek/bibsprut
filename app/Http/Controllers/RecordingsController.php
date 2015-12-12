@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use App\YoutubeVideo;
+use App\Recording;
 use Illuminate\Http\Request;
 
-class YoutubeController extends Controller
+class RecordingsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,10 +16,10 @@ class YoutubeController extends Controller
      */
     public function index(Request $request)
     {
-        $videos = YoutubeVideo::orderBy('recorded_at', 'desc')->get();
+        $recordings = Recording::orderBy('recorded_at', 'desc')->get();
 
-        return response()->view('youtube.index', [
-            'videos' => $videos
+        return response()->view('recordings.index', [
+            'recordings' => $recordings
         ]);
     }
 

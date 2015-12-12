@@ -28,7 +28,7 @@ return [
     |
     */
 
-    'cloud' => 's3',
+    'cloud' => 'webdav',
 
     /*
     |--------------------------------------------------------------------------
@@ -48,18 +48,11 @@ return [
             'root'   => storage_path('app'),
         ],
 
-        'ftp' => [
-            'driver'   => 'ftp',
-            'host'     => 'ftp.example.com',
-            'username' => 'your-username',
-            'password' => 'your-password',
-
-            // Optional FTP Settings...
-            // 'port'     => 21,
-            // 'root'     => '',
-            // 'passive'  => true,
-            // 'ssl'      => true,
-            // 'timeout'  => 30,
+        'webdav' => [
+            'driver'     => 'webdav',
+            'baseUri'    => env('WEBDAV_BASE_URI'),
+            'userName'   => env('WEBDAV_USERNAME'),
+            'password'   => env('WEBDAV_PASSWORD'),
         ],
 
         's3' => [
