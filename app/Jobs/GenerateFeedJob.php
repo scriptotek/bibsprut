@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Event;
-use App\YoutubeVideo;
+use App\Recording;
 use Carbon\Carbon;
 use cebe\markdown\GithubMarkdown;
 use Illuminate\Contracts\Bus\SelfHandling;
@@ -73,7 +73,7 @@ class GenerateFeedJob extends Job implements SelfHandling
 
             $lastModified = Carbon::createFromDate(2000, 1, 1);
 
-            foreach (YoutubeVideo::with('presentation', 'presentation.event')->orderBy('recorded_at', 'desc')->get() as $video) {
+            foreach (Recording::with('presentation', 'presentation.event')->orderBy('recorded_at', 'desc')->get() as $video) {
                 if (!$video->presentation) {
                     continue;
                 }
@@ -92,7 +92,7 @@ class GenerateFeedJob extends Job implements SelfHandling
                     }
                 }
 
-                $mp4url = null;
+                $mp4Url = null;
                 $mp4filesize = 0;
 
                 $writer->startElement('item');
@@ -120,7 +120,7 @@ class GenerateFeedJob extends Job implements SelfHandling
                     $writer->endElement();
 
                     $writer->startElement('media:embed');  // ???
-                      $writer->writeAttribute('url', $video->link('embed'));
+                      $writer->writeAttribute('url', $video->youtubeLink('embed'));
                     $writer->endElement();
 
                     if (!is_null($mp4Url)) {
@@ -130,15 +130,17 @@ class GenerateFeedJob extends Job implements SelfHandling
                         $writer->writeAttribute('type', 'video/mp4');
                     }
 
-                    $writer->startElement('media:content');
-                        $writer->writeAttribute('url', $primaryResource->url('webdav'));
-                        $writer->writeAttribute('width', $primaryResource->width);
-                        $writer->writeAttribute('height', $primaryResource->height);
-                        $writer->writeAttribute('type', 'image/jpeg');
-                        // $writer->writeElement('attribution', $primaryResource->attribution);
-                        // Se: http://www.rssboard.org/media-rss#media-license
-                        //$writer->writeElement('media:license', $primaryResource->license);
-                    $writer->endElement();
+                    if (!is_null($primaryResource)) {
+                        $writer->startElement('media:content');
+                            $writer->writeAttribute('url', $primaryResource->url('webdav'));
+                            $writer->writeAttribute('width', $primaryResource->width);
+                            $writer->writeAttribute('height', $primaryResource->height);
+                            $writer->writeAttribute('type', 'image/jpeg');
+                            // $writer->writeElement('attribution', $primaryResource->attribution);
+                            // Se: http://www.rssboard.org/media-rss#media-license
+                            //$writer->writeElement('media:license', $primaryResource->license);
+                        $writer->endElement();
+                    }
 
                     if ($event->updated_at > $lastModified) {
                         $lastModified = $event->updated_at;
