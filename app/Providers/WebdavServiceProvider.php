@@ -34,7 +34,7 @@ class WebdavServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('webdav', function ($app) {
-            return new WebdavClient(new Client(config('webdav')));
+            return new WebdavClient();
         });
     }
 

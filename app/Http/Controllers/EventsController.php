@@ -60,6 +60,10 @@ class EventsController extends Controller
 
         $vortex = app('webdav')->get($data['vortex_url']);
 
+        if (!$vortex) {
+            die("Failed to get Vortex page $url");
+        }
+
         $data['title'] = $vortex->properties->title;
         $data['description'] = strip_tags($vortex->properties->content);
         $data['location'] = $vortex->properties->location;
@@ -278,9 +282,7 @@ class EventsController extends Controller
     public function show($id)
     {
         $event = Event::findOrFail($id);
-
         $vortex = app('webdav')->get($event->vortex_url);
-        // print_r($vortex);die;
 
         $data = [
             'event' => $event,

@@ -100,44 +100,49 @@
 
   <div class="description">
 
-    <p>
-      <div style="float:right; margin-left:20px;background:#eee; border:1px solid #ccc;">
-        <img src="https://www.ub.uio.no{{ $vortex->properties->picture }}">
-        <div style="padding:3px;">{!! isset($vortex->properties->caption) ? $vortex->properties->caption : ''  !!}</div>
+    @if ($vortex)
+
+      <p>
+        <div style="float:right; margin-left:20px;background:#eee; border:1px solid #ccc;">
+          <img src="https://www.{{ $vortex->inst }}.uio.no{{ $vortex->properties->picture }}">
+          <div style="padding:3px;">{!! isset($vortex->properties->caption) ? $vortex->properties->caption : ''  !!}</div>
+        </div>
+
+        Fra: {{ $vortex->properties->{"start-date"} }}.
+          Til: {{ isset($vortex->properties->{"end-date"}) ? $vortex->properties->{"end-date"} : '???' }}<br>
+          Sted: <a href="{{ $vortex->properties->mapurl }}">{{ $vortex->properties->location }}</a>
+      <br>
+        Organisert av:
+
+      @foreach ($vortex->properties->organizers as $org)
+        <a href="{{ $org->{'organizer-url'} }}" class="label label-danger" style="display:inline-block;">{{ $org->organizer }}</a>
+      @endforeach
+      <br>
+      Nøkkelord:
+      @if (isset($vortex->properties->tags))
+            @foreach ($vortex->properties->tags as $tag)
+              <a href="#" class="label label-success" style="display:inline-block;">{{ $tag }}</a>
+            @endforeach
+      @else
+        <em>(ingen)</em>
+      @endif
+
+      </p>
+
+      <hr>
+
+      <div style="font-style: italic">
+        {!! $vortex->properties->introduction !!}
       </div>
 
-      Fra: {{ $vortex->properties->{"start-date"} }}.
-        Til: {{ isset($vortex->properties->{"end-date"}) ? $vortex->properties->{"end-date"} : '???' }}<br>
-        Sted: <a href="{{ $vortex->properties->mapurl }}">{{ $vortex->properties->location }}</a>
-    <br>
-      Organisert av:
+      <hr>
 
-    @foreach ($vortex->properties->organizers as $org)
-      <a href="{{ $org->{'organizer-url'} }}" class="label label-danger" style="display:inline-block;">{{ $org->organizer }}</a>
-    @endforeach
-    <br>
-    Nøkkelord:
-    @if (isset($vortex->properties->tags))
-          @foreach ($vortex->properties->tags as $tag)
-            <a href="#" class="label label-success" style="display:inline-block;">{{ $tag }}</a>
-          @endforeach
+      <div>
+      {!! $vortex->properties->content !!}
+      </div>
     @else
-      <em>(ingen)</em>
+      <em>Fant ikke Vortex-side</em>
     @endif
-
-    </p>
-
-    <hr>
-
-    <div style="font-style: italic">
-      {!! $vortex->properties->introduction !!}
-    </div>
-
-    <hr>
-
-    <div>
-    {!! $vortex->properties->content !!}
-    </div>
   </div>
 
   </div>
