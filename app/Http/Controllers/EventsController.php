@@ -14,91 +14,7 @@ use Ramsey\Uuid\Uuid;
 
 class EventsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $events = Event::all();
-
-        return response()->view('events.index', ['events' => $events]);
-    }
-
-    public function scrapeYouTubePage($youtubeId, &$data)
-    {
-        $recording = Recording::findOrFail($youtubeId);
-        $data['p1_youtube_id'] = $recording->youtube_id;
-        $data['title'] = array_get($recording->youtube_meta, 'title');
-        $data['description'] = array_get($recording->youtube_meta, 'description');
-    }
-
-    public function vortexUrlFromText($text)
-    {
-        $vortex_pattern1 = '/(https?:\/\/www.ub.uio.no\/om\/aktuelt\/arrangementer\/[^\s]+)/';
-        $vortex_pattern2 = '/(https?:\/\/www.ub.uio.no\/english\/about\/news-and-events\/events\/[^\s]+)/';
-        if (!preg_match($vortex_pattern1, $text, $matches)) {
-            if (!preg_match($vortex_pattern2, $text, $matches)) {
-                return null;
-            }
-        }
-        return $matches[1];
-    }
-
-    public function scrapeVortexPage(&$data, $url)
-    {
-        // Ex: http://bibsprut-dev.net:8000/events/create?from_vortex=http://www.ub.uio.no/om/aktuelt/arrangementer/ureal/science-debate/2015/biokonferansen2015.html
-        $fb_pattern = '/https?:\/\/www\.facebook\.com\/events\/([0-9]+)/';
-
-        $data['vortex_url'] = $url;
-        // $data['description'] = preg_replace($vortex_pattern1, '', $data['description']);
-        // $data['description'] = preg_replace($vortex_pattern2, '', $data['description']);
-
-        // $data['description'] = preg_replace('/\n\n\n/', "\n\n", $data['description']);
-        // $data['description'] = preg_replace('/\n\n\n/', "\n\n", $data['description']);
-
-        $vortex = app('webdav')->get($data['vortex_url']);
-
-        if (!$vortex) {
-            die("Failed to get Vortex page $url");
-        }
-
-        $data['title'] = $vortex->properties->title;
-        $data['description'] = strip_tags($vortex->properties->content);
-        $data['location'] = $vortex->properties->location;
-
-        if (isset($vortex->properties->{'start-date'})) {
-            $dts = explode(' ', $vortex->properties->{'start-date'});
-            $data['start_date'] = $dts[0];
-            $data['p1_start_time'] = $dts[1];
-        }
-
-        if (isset($vortex->properties->{'end-date'})) {
-            $dts = explode(' ', $vortex->properties->{'end-date'});
-            $data['p1_end_time'] = $dts[1];
-        }
-
-        if (preg_match($fb_pattern, $vortex->properties->content, $matches2)) {
-            $data['facebook_id'] = $matches2[1];
-        }
-
-    }
-
-    public function getYoutubePlaylists()
-    {
-        $youtubePlaylists = ['0' => '(Ingen spilleliste)'];
-        foreach (YoutubePlaylist::all() as $pl) {
-            $youtubePlaylists[$pl->id] = $pl->title;
-        }
-        return $youtubePlaylists;
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    /*
     public function create(Request $request)
     {
         $data = [
@@ -138,12 +54,7 @@ class EventsController extends Controller
         return response()->view('events.create', $data);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function store(Request $request)
     {
         $event = new Event();
@@ -191,12 +102,6 @@ class EventsController extends Controller
             ->with('status', 'Arrangementet ble opprettet.');
     }
 
-    /**
-     * Display edit form for the resources
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function editResources($id)
     {
         $event = Event::findOrFail($id);
@@ -273,12 +178,6 @@ class EventsController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $event = Event::findOrFail($id);
@@ -292,12 +191,7 @@ class EventsController extends Controller
         return response()->view('events.show', $data);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function edit($id)
     {
         $event = Event::findOrFail($id);
@@ -326,13 +220,6 @@ class EventsController extends Controller
         return response()->view('events.create', $data);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  int  $id
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function update($id, Request $request)
     {
         $event = Event::findOrFail($id);
@@ -383,14 +270,10 @@ class EventsController extends Controller
             ->with('status', 'Arrangementet ble oppdatert.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function destroy($id)
     {
         //
     }
+    */
 }

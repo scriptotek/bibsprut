@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-    <title>bibsprut</title>
+    <title>Blekkio</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ URL::to('css/app.css') }}">
@@ -15,19 +14,46 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.2.0/min/dropzone.min.css">
     @yield('head')
-
 </head>
 <body>
 
     <div class="container" style="margin-bottom:150px;">
         <header>
             <img src="/octopus-33147_640.png" style="width:200px; float:right;">
-            <h1><a href="/">bibsprut</a></h1>
+            <h1><a href="/">Blekkio</a></h1>
         </header>
 
         @if (session('status'))
             <div class="alert alert-success">
                 {{ session('status') }}
+            </div>
+        @endif
+
+        @if ($accounts)
+        <div>
+            Kontoer:
+            @foreach ($accounts as $acc)
+              <div style="display: inline-block;background:#eee;border-radius: 15px; padding-right:8px;">
+                  <img src="{{ $acc->userinfo['picture'] }}" style="width:30px; border-radius:15px;">
+                  {{ $acc->userinfo['name'] }}
+                  <a href="{{ action('GoogleAuthController@logout', ['email' => $acc->id]) }}">[X]</a>
+              </div>
+            @endforeach
+            <div style="display: inline-block;">
+                <a href="{{ action('GoogleAuthController@initiate') }}">Legg til</a>
+            </div>
+        </div>
+        @endif
+
+        @if ($lastHarvest)
+            <div>
+                Sist oppdatert:
+                @if ($lastHarvest->completed_at)
+                    {{ $lastHarvest->completed_at->tz('Europe/Oslo')->formatLocalized('%d. %B %Y, %H:%M') }}
+                    <a href="{{ action('HarvestsController@harvest')  }}">Oppdater nå</a>
+                @else
+                    <em>oppdatering pågår</em>
+                @endif
             </div>
         @endif
 

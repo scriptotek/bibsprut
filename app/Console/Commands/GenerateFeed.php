@@ -4,11 +4,9 @@ namespace App\Console\Commands;
 
 use App\Jobs\GenerateFeedJob;
 use Illuminate\Console\Command;
-use Illuminate\Foundation\Bus\DispatchesCommands;
 
 class GenerateFeed extends Command
 {
-    use DispatchesCommands;
 
     /**
      * The name and signature of the console command.
@@ -42,7 +40,7 @@ class GenerateFeed extends Command
     public function handle()
     {
         //$this->info('Generating feed');
-        $this->dispatch(
+        dispatch(
             new GenerateFeedJob()
         );
         //$this->info('Done');

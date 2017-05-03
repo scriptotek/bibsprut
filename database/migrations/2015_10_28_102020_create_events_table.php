@@ -20,7 +20,7 @@ class CreateEventsTable extends Migration
             $table->string('title');
             $table->text('intro');
             $table->text('description');
-            $table->jsonb('tags');
+            $table->binary('tags');
             $table->string('thumbnail');
             $table->date('start_date');
             $table->string('archive_dir');

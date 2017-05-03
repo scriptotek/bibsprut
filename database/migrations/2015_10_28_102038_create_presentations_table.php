@@ -21,7 +21,7 @@ class CreatePresentationsTable extends Migration
             $table->time('start_time');
             $table->time('end_time');
 
-            $table->jsonb('tags');
+            $table->binary('tags');
             $table->string('thumbnail');
 
             $table->string('archive_dir');

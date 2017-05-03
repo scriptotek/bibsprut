@@ -2,27 +2,29 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\YoutubeHarvestJob;
+use App\Jobs\GenerateVortexHtmlJob;
 use Illuminate\Console\Command;
 
-class HarvestYoutube extends Command
+class GenerateVortexHtml extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'harvest:youtube';
+    protected $signature = 'generate:vortex';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Harvest videos from Youtube.';
+    protected $description = 'Generate Vortex HTML.';
 
     /**
      * Create a new command instance.
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -36,10 +38,8 @@ class HarvestYoutube extends Command
      */
     public function handle()
     {
-        $this->info('Harvesting video metadata from Youtube');
         dispatch(
-            new YoutubeHarvestJob()
+            new GenerateVortexHtmlJob()
         );
-        $this->info('Done');
     }
 }

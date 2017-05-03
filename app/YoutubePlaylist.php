@@ -31,4 +31,17 @@ class YoutubePlaylist extends Model
         return $this->hasOne('App\Event');
     }
 
+    public function youtubeLink($method='watch')
+    {
+        $host = 'https://www.youtube.com';
+        switch ($method) {
+            case 'embed':
+                return $host . '/embed/videoseries?list=' . $this->youtube_id;
+
+            default:
+                return $host .'/playlist?list=' . $this->youtube_id;
+        }
+    }
+
+
 }

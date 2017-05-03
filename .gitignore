@@ -4,3 +4,8 @@ Homestead.yaml
 Homestead.json
 .env
 composer.lock
+/yarn.lock
+/public/js
+/public/css
+/public/mix-manifest.json
+/composer.phar

@@ -16,24 +16,13 @@ class WebdavServiceProvider extends ServiceProvider
     protected $defer = true;
 
     /**
-     * Bootstrap the application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        // $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-        // $loader->alias('Vortex', 'App\Facades\Vortex');
-    }
-
-    /**
      * Register the application services.
      *
      * @return void
      */
     public function register()
     {
-        $this->app->singleton('webdav', function ($app) {
+        $this->app->singleton(WebdavClient::class, function () {
             return new WebdavClient();
         });
     }
@@ -45,7 +34,9 @@ class WebdavServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return array('webdav');
+        return [
+            WebdavClient::class,
+        ];
     }
 
 }

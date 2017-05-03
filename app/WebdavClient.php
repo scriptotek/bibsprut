@@ -3,48 +3,61 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use RuntimeException;
 use Sabre\DAV\Client;
 
 class WebdavClient extends Model
 {
-
-    protected $client;
+    protected $clients = [];
 
     /**
-     * Constructor
+     * @param $inst
+     * @return Client
      */
-    public function __construct()
+    protected function getClient($inst)
     {
+        if (!isset($this->clients[$inst])) {
+            $config = config('webdav');
+            $config['baseUri'] = str_replace('{inst}', $inst, $config['baseUri']);
+            $this->clients[$inst] = new Client($config);
+        }
+
+        return $this->clients[$inst];
     }
 
-    public function getClientFromInst($inst)
+    protected function parseUri($uri)
     {
-        $config = config('webdav');
-        $config['baseUri'] = str_replace('{inst}', $inst, $config['baseUri']);
-        return new Client($config);
+        if (!preg_match('/https?:\/\/(www\.)?([a-z]+)\.uio.no\/(.+)/', $uri, $matches)) {
+            throw new RuntimeException('URL from unknown WebDAV domain: ' . $uri);
+        }
+        $inst = $matches[2];
+        $path = $matches[3];
+
+        return [$this->getClient($inst), $path];
     }
 
     public function get($url)
     {
-        if (preg_match('/https?:\/\/(www\.)?([a-z]+)\.uio.no\/(.+)/', $url, $matches)) {
-            $client = $this->getClientFromInst($matches[2]);
-            $rest = $matches[3];
-            $response = $client->request('GET', $rest);
-            $response = json_decode($response['body']);
-            if (!$response) {
-                return null;
-            }
-            $response->inst = $matches[2];
+        list($client, $path) = $this->parseUri($url);
 
-            return $response;
-        } else {
-            return null;  // Eller exception?
+        $response = $client->request('GET', $path);
+        if ($response['statusCode'] == 401) {
+            throw new RuntimeException('Please check WebDAV credentials. Got 401 Unauthorized');
         }
+        $body = json_decode($response['body']);
+        return $body;
     }
 
     public function put($url, $body)
     {
-        $response = $this->client->request('PUT', $url, $body);
-        return ($response['statusCode'] == 201);
+        list($client, $path) = $this->parseUri($url);
+
+        $response = $client->request('PUT', $path, $body, [
+            'Content-Type' => 'application/json',
+        ]);
+
+        if ($response['statusCode'] < 200 || $response['statusCode'] >= 300) {
+            throw new RuntimeException('Failed to PUT ' . $path);
+        };
     }
 }

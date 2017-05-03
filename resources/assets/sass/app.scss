@@ -1,2 +1,32 @@
-// @import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
 
+// Fonts
+//@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);
+
+// Variables
+//@import "variables";
+
+// Bootstrap
+//@import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+
+.events {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+.events > li {
+  padding: 0;
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+}
+.events > li > *, .video  {
+  padding: 8px 16px;
+}
+
+.video {
+	list-style-type: none;
+}
+.events .disabled {
+	opacity: 0.4;
+	background: #eee;
+	color: #888;
+}

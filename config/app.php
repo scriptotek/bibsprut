@@ -2,6 +2,8 @@
 
 return [
 
+    'env' => env('APP_ENV', 'production'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode
@@ -52,7 +54,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'nb',
 
     /*
     |--------------------------------------------------------------------------
@@ -113,13 +115,11 @@ return [
         /*
          * Laravel Framework Service Providers...
          */
-        Illuminate\Foundation\Providers\ArtisanServiceProvider::class,
         Illuminate\Auth\AuthServiceProvider::class,
         Illuminate\Broadcasting\BroadcastServiceProvider::class,
         Illuminate\Bus\BusServiceProvider::class,
         Illuminate\Cache\CacheServiceProvider::class,
         Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class,
-        Illuminate\Routing\ControllerServiceProvider::class,
         Illuminate\Cookie\CookieServiceProvider::class,
         Illuminate\Database\DatabaseServiceProvider::class,
         Illuminate\Encryption\EncryptionServiceProvider::class,
@@ -144,6 +144,7 @@ return [
         GrahamCampbell\Markdown\MarkdownServiceProvider::class,
         PulkitJalan\Google\GoogleServiceProvider::class,
         Collective\Html\HtmlServiceProvider::class,
+        Laravel\Tinker\TinkerServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -204,7 +205,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View'      => Illuminate\Support\Facades\View::class,
         'Markdown'  => GrahamCampbell\Markdown\Facades\Markdown::class,
-        'Google'    => PulkitJalan\Google\Facades\Google::class,
+        'Google'   => PulkitJalan\Google\Facades\Google::class,
         'Form'      => Collective\Html\FormFacade::class,
     ],
 
