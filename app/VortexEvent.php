@@ -61,6 +61,10 @@ class VortexEvent extends Model
                 $this->start_time = Carbon::parse($node->attr('title'));
             });
 
+            if (!$this->start_time) {
+                throw new ScrapeException('Not a valid Vortex event page: ' . $this->url);
+            }
+
             $crawler->filter('#vrtx-content h1')->each(function (Crawler $node) {
                 $this->title = trim($node->text());
             });
