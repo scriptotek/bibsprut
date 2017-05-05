@@ -267,7 +267,7 @@ class YoutubeHarvestJob extends Job
 
             echo "- " . $response->snippet->title . "\n";
 
-            $playlist = YoutubePlaylist::firstOrCreate(['youtube_id' => $id]);
+            $playlist = YoutubePlaylist::firstOrNew(['youtube_id' => $id]);
 
             $playlist->is_public = ($response->status->privacyStatus == 'public');
             $playlist->title = $response->snippet->title;
