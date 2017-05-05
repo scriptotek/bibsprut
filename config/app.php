@@ -146,6 +146,7 @@ return [
         Collective\Html\HtmlServiceProvider::class,
         Laravel\Tinker\TinkerServiceProvider::class,
         Aacotroneo\Saml2\Saml2ServiceProvider::class,
+        Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
 
         /*
          * Application Service Providers...
