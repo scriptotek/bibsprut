@@ -4,19 +4,16 @@ namespace App;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Harvest extends Model
 {
+    use SoftDeletes;
+
     /**
      * The attributes that should be mutated to dates.
      *
      * @var array
      */
-    protected $dates = ['completed_at'];
-
-    public function complete()
-    {
-        $this->completed_at = Carbon::now();
-        $this->save();
-    }
+    protected $dates = ['deleted_at'];
 }

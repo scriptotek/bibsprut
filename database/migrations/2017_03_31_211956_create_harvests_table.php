@@ -15,9 +15,8 @@ class CreateHarvestsTable extends Migration
     {
         Schema::create('harvests', function (Blueprint $table) {
             $table->increments('id');
-
             $table->timestamps();
-            $table->dateTime('completed_at')->nullable();
+            $table->softDeletes();
         });
     }
 

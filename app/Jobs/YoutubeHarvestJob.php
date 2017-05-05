@@ -13,6 +13,13 @@ use PulkitJalan\Google\Client as GoogleClient;
 
 class YoutubeHarvestJob extends Job
 {
+    protected $force;
+
+    public function __construct($force)
+    {
+        $this->force = $force;
+    }
+
     public function vortexUrlFromText($text)
     {
         $pattern = '/(https?:\/\/[^\s]+.uio.no\/[^\s]+)/';
@@ -284,10 +291,14 @@ class YoutubeHarvestJob extends Job
      */
     public function handle()
     {
-        $running = Harvest::whereNull('completed_at')->count();
-        if ($running > 0) {
-            \Log::error('Another harvest is running or did not exit normally. Use -f to override.');
-            return;
+        $running = Harvest::first();
+        if (!is_null($running)) {
+            if ($this->force) {
+                $running->delete();
+            } else {
+                \Log::error('Another harvest is running or did not exit normally. Use -f to override.');
+                return;
+            }
         }
 
         $harvest = Harvest::create();
@@ -307,7 +318,7 @@ class YoutubeHarvestJob extends Job
                 $this->harvestPlaylists($youtube, $account);
             }
         } finally {
-            $harvest->complete();
+            $harvest->delete();
         }
     }
 }

@@ -12,7 +12,7 @@ class HarvestYoutube extends Command
      *
      * @var string
      */
-    protected $signature = 'harvest:youtube';
+    protected $signature = 'harvest:youtube {--f|force}';
 
     /**
      * The console command description.
@@ -37,8 +37,9 @@ class HarvestYoutube extends Command
     public function handle()
     {
         $this->info('Harvesting video metadata from Youtube');
+        $force = $this->option('force');
         dispatch(
-            new YoutubeHarvestJob()
+            new YoutubeHarvestJob($force)
         );
         $this->info('Done');
     }
