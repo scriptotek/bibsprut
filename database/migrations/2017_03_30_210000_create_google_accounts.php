@@ -15,9 +15,9 @@ class CreateGoogleAccounts extends Migration
     {
         Schema::create('google_accounts', function (Blueprint $table) {
             $table->string('id')->nullable()->unique();
-            $table->binary('channel')->nullable();
-            $table->binary('token')->nullable();
-            $table->binary('userinfo')->nullable();
+            $table->text('channel')->nullable();
+            $table->json('token')->nullable();
+            $table->json('userinfo')->nullable();
             $table->integer('token_expiration')->nullable()->unsigned();
             $table->timestamps();
 

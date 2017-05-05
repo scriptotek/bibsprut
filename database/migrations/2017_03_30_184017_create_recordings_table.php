@@ -16,7 +16,7 @@ class CreateRecordingsTable extends Migration
             $table->increments('id');
 
             $table->string('youtube_id')->unique()->nullable();
-            $table->binary('youtube_meta')->nullable();  // or binary...
+            $table->json('youtube_meta')->nullable();  // or binary...
 
             $table->dateTime('start_time')->nullable();
             $table->dateTime('end_time')->nullable();
@@ -33,7 +33,7 @@ class CreateRecordingsTable extends Migration
             // $table->string('language', 6)->nullable();
             // $table->string('title');
             // $table->text('description');
-            // $table->binary('tags');
+            // $table->json('tags');
             // $table->integer('views')->unsigned();
             // $table->string('thumbnail')->nullable();
             // $table->string('duration')->nullable();

@@ -17,8 +17,8 @@ class CreateVortexEvents extends Migration
             $table->increments('id');
             $table->string('url')->unique();
             $table->text('title');
-            $table->binary('organizers');
-            $table->binary('tags');
+            $table->json('organizers');
+            $table->json('tags');
             $table->text('introduction')->nullable();
             $table->longText('text')->nullable();
 
