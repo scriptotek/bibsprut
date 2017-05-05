@@ -145,6 +145,7 @@ return [
         PulkitJalan\Google\GoogleServiceProvider::class,
         Collective\Html\HtmlServiceProvider::class,
         Laravel\Tinker\TinkerServiceProvider::class,
+        Aacotroneo\Saml2\Saml2ServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -205,8 +206,9 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View'      => Illuminate\Support\Facades\View::class,
         'Markdown'  => GrahamCampbell\Markdown\Facades\Markdown::class,
-        'Google'   => PulkitJalan\Google\Facades\Google::class,
+        'Google'    => PulkitJalan\Google\Facades\Google::class,
         'Form'      => Collective\Html\FormFacade::class,
+        'Saml2'     => Aacotroneo\Saml2\Facades\Saml2Auth::class,
     ],
 
 ];

@@ -20,7 +20,8 @@
         "laravelcollective/html": "5.4.*",
         "fabpot/goutte": "^3.2",
         "laravel/tinker": "^1.0",
-        "twig/twig": "^2.3"
+        "twig/twig": "^2.3",
+        "aacotroneo/laravel-saml2": "^0.8.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

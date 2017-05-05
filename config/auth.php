@@ -2,6 +2,8 @@
 
 return [
 
+    'activation_admin_email' => env('ACTIVATION_ADMIN_EMAIL'),
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults

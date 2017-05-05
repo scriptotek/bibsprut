@@ -22,7 +22,17 @@ Route::get('/oauth2logout', 'GoogleAuthController@logout');
 Route::get('/harvests/harvest', 'HarvestsController@harvest');
 
 Route::get('/videos', 'VideosController@index');
-Route::get('/videos/{id}/hide', 'VideosController@hide');
+Route::get('/videos/{id}/hide', 'VideosController@hide')->middleware('auth');
+
+Route::get('user/activation/{token}', 'Auth\LoginController@activateUser')->name('user.activate');
+Route::resource('users', 'UsersController', ['only' => [
+    'index', 'show'
+]]);
+
+Route::get('saml2/error', 'Auth\LoginController@error');
+Auth::routes();
+Route::post('logout', 'Auth\LoginController@samlLogout');  // override POST route
+
 
 /*
  * Route::resource('events', 'EventsController');

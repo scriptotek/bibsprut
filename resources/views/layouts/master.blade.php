@@ -17,35 +17,105 @@
 </head>
 <body>
 
-    <div class="container" style="margin-bottom:150px;">
-        <header>
-            <img src="/octopus-33147_640.png" style="width:200px; float:right;">
-            <h1><a href="/">Blekkio</a></h1>
-        </header>
+    <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
 
-        @if (session('status'))
-            <div class="alert alert-success">
-                {{ session('status') }}
+                <!-- Collapsed Hamburger -->
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <span class="icon-bar"></span>
+
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+
+                <!-- Branding Image -->
+                <a class="navbar-brand" href="{{ url('/') }}">
+                    <!--<img src="/images/uio-app-small-black-eng-responsive.png" alt="">-->
+                    Blekkio
+                </a>
             </div>
-        @endif
 
-        @if ($accounts)
+            <div class="collapse navbar-collapse" id="app-navbar-collapse">
+
+                <!-- Right Side Of Navbar -->
+                <ul class="nav navbar-nav navbar-right">
+                    <!-- Authentication Links -->
+                    @if (Auth::guest())
+                        <li>
+                            <a href="{{ url('/saml2/login') }}">Login</a>
+                        </li>
+                    @else
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                {{ Auth::user()->name }} <span class="caret"></span>
+                            </a>
+
+                            <ul class="dropdown-menu" role="menu">
+                                <li>
+                                    <a href="{{ url('/logout') }}"
+                                        onclick="event.preventDefault();
+                                                 document.getElementById('logout-form').submit();">
+                                        Logout
+                                    </a>
+
+                                    <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">
+                                        {{ csrf_field() }}
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    @if (Session::has('status'))
+    <div class="container">
+        <div class="alert alert-success">
+            <p>
+                {{ Session::get('status') }}
+            </p>
+        </div>
+    </div>
+    @endif
+
+    @if (Session::has('error'))
+    <div class="container">
+        <div class="alert alert-danger">
+            <p>
+                {{ Session::get('error') }}
+            </p>
+        </div>
+    </div>
+    @endif
+
+    <div class="container" style="margin-bottom:150px;">
+            <img src="/octopus-33147_640.png" style="width:200px; float:right;">
+
+        @if (isset($accounts))
         <div>
             Kontoer:
             @foreach ($accounts as $acc)
               <div style="display: inline-block;background:#eee;border-radius: 15px; padding-right:8px;">
                   <img src="{{ $acc->userinfo['picture'] }}" style="width:30px; border-radius:15px;">
                   {{ $acc->userinfo['name'] }}
+                  @if (Auth::check())
                   <a href="{{ action('GoogleAuthController@logout', ['email' => $acc->id]) }}">[X]</a>
+                  @endif
               </div>
             @endforeach
+            @if (Auth::check())
             <div style="display: inline-block;">
                 <a href="{{ action('GoogleAuthController@initiate') }}">Legg til</a>
             </div>
+            @endif
         </div>
         @endif
 
-        @if ($lastHarvest)
+        @if (isset($lastHarvest))
             <div>
                 Sist oppdatert:
                 @if ($lastHarvest->completed_at)
