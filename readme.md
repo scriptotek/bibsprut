@@ -1,5 +1,7 @@
 # Blekkio
 
+[![Join the chat at https://gitter.im/scriptotek/blekkio](https://badges.gitter.im/scriptotek/blekkio.svg)](https://gitter.im/scriptotek/blekkio?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Simple video database that harvests and connects data from YouTube,
 [Vortex](https://www.uio.no/english/services/it/web/vortex/) and other sources.
 
