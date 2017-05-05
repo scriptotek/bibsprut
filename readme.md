@@ -5,6 +5,12 @@ Simple video database that harvests and connects data from YouTube,
 
 Updates https://ub.uio.no/live
 
+## Task scheduler
+
+To activate the task scheduler, add this to `/etc/crontab`:
+
+      *  *  *  *  * apache     php /path/to/blekkio/artisan schedule:run 1>> /dev/null 2>&1
+
 ## Local development
 
 Requirements: PHP + [Composer](https://getcomposer.org), Node + NPM.
