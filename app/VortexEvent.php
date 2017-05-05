@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Exceptions\ScrapeException;
 use Carbon\Carbon;
 use Goutte\Client as GoutteClient;
 use Illuminate\Database\Eloquent\Model;
@@ -51,6 +52,10 @@ class VortexEvent extends Model
         if (!empty($this->url) && empty($this->text)) {
             $client = new GoutteClient();
             $crawler = $client->request('GET', $this->url);
+            $response = $client->getResponse();
+            if ($response->getStatus() != 200) {
+                throw new ScrapeException('Could not get URL ' . $this->url);
+            }
 
             $crawler->filter('.vevent .dtstart')->each(function (Crawler $node) {
                 $this->start_time = Carbon::parse($node->attr('title'));

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Exceptions\ScrapeException;
 use App\GoogleAccount;
 use App\Harvest;
 use App\VortexEvent;
@@ -62,10 +63,15 @@ class YoutubeHarvestJob extends Job
             if (empty($vortexLink)) {
                 $recording->vortex_event_id = null;
             } else {
-                $vortexEvent = VortexEvent::where(['url' => $vortexLink])->withTrashed()->first() ?: new VortexEvent(['url' => $vortexLink]);
-                $vortexEvent->scrape();
-                $vortexEvent->save();
-                $recording->vortex_event_id = $vortexEvent->id;
+                try {
+                    $vortexEvent = VortexEvent::where(['url' => $vortexLink])->withTrashed()->first() ?: new VortexEvent(['url' => $vortexLink]);
+                    $vortexEvent->scrape();
+                    $vortexEvent->save();
+                    $recording->vortex_event_id = $vortexEvent->id;
+                } catch (ScrapeException $exception) {
+                    echo 'Failed to scrape URL: ' . $vortexLink;
+                    \Log::warning('Failed to scrape URL: ' . $vortexLink);
+                }
             }
         }
 
