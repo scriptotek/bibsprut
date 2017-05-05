@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRecordingsTable extends Migration
+class CreateYoutubeVideosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,7 +12,7 @@ class CreateRecordingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('recordings', function(Blueprint $table) {
+        Schema::create('youtube_videos', function(Blueprint $table) {
             $table->increments('id');
 
             $table->string('youtube_id')->unique()->nullable();
@@ -20,10 +20,10 @@ class CreateRecordingsTable extends Migration
 
             $table->dateTime('start_time')->nullable();
             $table->dateTime('end_time')->nullable();
-            $table->string('duration')->nullable();
-            $table->string('filename')->nullable();
-            $table->integer('width')->nullable();
-            $table->integer('height')->nullable();
+            //$table->string('duration')->nullable();
+            //$table->string('filename')->nullable();
+            //$table->integer('width')->nullable();
+            //$table->integer('height')->nullable();
 
             $table->string('account_id')->nullable();
 
@@ -42,14 +42,14 @@ class CreateRecordingsTable extends Migration
             // $table->boolean('is_public');
             // $table->string('license')->nullable();
             // $table->integer('presentation_id')->unsigned()->nullable();
-            $table->integer('presentation_id')->unsigned()->nullable();
+            // $table->integer('presentation_id')->unsigned()->nullable();
             $table->integer('vortex_event_id')->unsigned()->nullable();
 
             $table->timestamps();
 
-            $table->foreign('presentation_id')
-                ->references('id')->on('presentations')
-                ->onDelete('set null');
+//            $table->foreign('presentation_id')
+//                ->references('id')->on('presentations')
+//                ->onDelete('set null');
 
             $table->foreign('vortex_event_id')
                 ->references('id')->on('vortex_events')
@@ -65,6 +65,6 @@ class CreateRecordingsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('recordings');
+        Schema::drop('youtube_videos');
     }
 }

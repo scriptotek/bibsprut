@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Event;
-use App\Recording;
+use App\YoutubeVideo;
 use Carbon\Carbon;
 use cebe\markdown\GithubMarkdown;
 use Illuminate\Contracts\Bus\SelfHandling;
@@ -73,7 +73,7 @@ class GenerateFeedJob extends Job implements SelfHandling
 
             $lastModified = Carbon::createFromDate(2000, 1, 1);
 
-            foreach (Recording::with('presentation', 'presentation.event')->orderBy('start_time', 'desc')->get() as $video) {
+            foreach (YoutubeVideo::with('presentation', 'presentation.event')->orderBy('start_time', 'desc')->get() as $video) {
                 if (!$video->presentation) {
                     continue;
                 }

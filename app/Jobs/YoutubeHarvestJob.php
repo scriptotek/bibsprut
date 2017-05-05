@@ -51,7 +51,7 @@ class YoutubeHarvestJob extends Job
 
     public function storeVideo($data, GoogleAccount $account)
     {
-        $recording = \App\Recording::where(['youtube_id' => $data->id])->withTrashed()->first() ?: new \App\Recording(['youtube_id' => $data->id]);
+        $recording = \App\YoutubeVideo::where(['youtube_id' => $data->id])->withTrashed()->first() ?: new \App\YoutubeVideo(['youtube_id' => $data->id]);
 
         $recording->account_id = $account->id;
 
@@ -143,7 +143,7 @@ class YoutubeHarvestJob extends Job
         $playlist = YoutubePlaylist::where('youtube_id', '=', $playlistId)->firstOrFail();
         foreach ($this->getPlaylistVideos($playlistId) as $response) {
             $videoId = $response->snippet->resourceId->videoId;
-            $recording = \App\Recording::where('youtube_id', '=', $videoId)->first();
+            $recording = \App\YoutubeVideo::where('youtube_id', '=', $videoId)->first();
             if (!is_null($recording)) {
                 $video_ids[$recording->id] = ['playlist_position' => $response->snippet->position];
             }

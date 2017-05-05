@@ -43,7 +43,7 @@ class VortexEvent extends Model
      */
     public function recordings()
     {
-        return $this->hasMany('App\Recording')
+        return $this->hasMany('App\YoutubeVideo')
             ->orderBy('start_time', 'asc');
     }
 

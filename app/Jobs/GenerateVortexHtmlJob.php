@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Recording;
+use App\YoutubeVideo;
 use App\WebdavClient;
 use RuntimeException;
 
@@ -152,7 +152,7 @@ class GenerateVortexHtmlJob extends Job
         $upcomingEvents = [];
         $pastEvents = [];
 
-        foreach (Recording::events(false, false) as $event) {
+        foreach (YoutubeVideo::events(false, false) as $event) {
             if ($event['recordings'][0]->upcoming()) {
                 $upcomingEvents[] = $event;
             } else {

@@ -45,6 +45,6 @@ class GoogleAccount extends Model
 
     public function recordings()
     {
-        return $this->belongsToMany('App\Recording');
+        return $this->belongsToMany('App\YoutubeVideo');
     }
 }

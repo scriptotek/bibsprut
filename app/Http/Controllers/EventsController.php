@@ -6,7 +6,7 @@ use App\Event;
 use App\EventResource;
 use App\Http\Requests;
 use App\Presentation;
-use App\Recording;
+use App\YoutubeVideo;
 use App\YoutubePlaylist;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

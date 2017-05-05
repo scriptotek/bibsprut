@@ -30,7 +30,7 @@ class Presentation extends Model
      */
     public function recording()
     {
-        return $this->hasOne('App\Recording');
+        return $this->hasOne('App\YoutubeVideo');
     }
 
     /**

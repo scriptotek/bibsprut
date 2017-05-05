@@ -6,7 +6,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\GoogleAccount;
 use App\Harvest;
-use App\Recording;
+use App\YoutubeVideo;
 use Illuminate\Http\Request;
 
 class RecordingsController extends Controller
@@ -29,7 +29,7 @@ class RecordingsController extends Controller
 
         return response()->view('recordings.index', [
             'lastHarvest' => $lastHarvest,
-            'events' => Recording::events($private, $missingDate),
+            'events' => YoutubeVideo::events($private, $missingDate),
             'accounts' => $accounts,
 
             'missingDate' => $missingDate,
@@ -51,7 +51,7 @@ class RecordingsController extends Controller
      */
     public function hide(Request $request, $id)
     {
-        $rec = Recording::find($id);
+        $rec = YoutubeVideo::find($id);
         $rec->delete();
 
         $request->session()->flash('status', '«' . $rec->yt('title') . '» ble skjult');
