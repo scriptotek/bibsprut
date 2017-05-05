@@ -23,13 +23,6 @@ class CreateYoutubePlaylistsTable extends Migration
             $table->timestamps();
 
         });
-
-        Schema::table('events', function(Blueprint $table) {
-            $table->integer('youtube_playlist_id')->unsigned()->nullable();
-            $table->foreign('youtube_playlist_id')
-                ->references('id')->on('youtube_playlists')
-                ->onDelete('set null');
-        });
     }
 
     /**
@@ -39,10 +32,6 @@ class CreateYoutubePlaylistsTable extends Migration
      */
     public function down()
     {
-        Schema::table('events', function(Blueprint $table) {
-            $table->dropForeign('events_youtube_playlist_id_foreign');
-            $table->dropColumn('youtube_playlist_id');
-        });
         Schema::drop('youtube_playlists');
     }
 }

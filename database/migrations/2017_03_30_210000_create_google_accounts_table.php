@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateGoogleAccounts extends Migration
+class CreateGoogleAccountsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -24,7 +24,7 @@ class CreateGoogleAccounts extends Migration
             $table->primary('id');
         });
 
-        Schema::table('recordings', function(Blueprint $table) {
+        Schema::table('youtube_videos', function(Blueprint $table) {
             $table->foreign('account_id')
                 ->references('id')->on('google_accounts')
                 ->onDelete('set null');
@@ -39,8 +39,8 @@ class CreateGoogleAccounts extends Migration
      */
     public function down()
     {
-        Schema::table('recordings', function(Blueprint $table) {
-            $table->dropForeign('recordings_account_id_foreign');
+        Schema::table('youtube_videos', function(Blueprint $table) {
+            $table->dropForeign('youtube_videos_account_id_foreign');
         });
         Schema::dropIfExists('google_accounts');
     }

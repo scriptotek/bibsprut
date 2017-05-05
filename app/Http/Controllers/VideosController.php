@@ -9,7 +9,7 @@ use App\Harvest;
 use App\YoutubeVideo;
 use Illuminate\Http\Request;
 
-class RecordingsController extends Controller
+class VideosController extends Controller
 {
     /**
      * Display a listing of the resource.

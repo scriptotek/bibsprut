@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function() {
-	return Redirect::to('/recordings');
+	return Redirect::to('/videos');
 });
 
 Route::get('/oauth2init', 'GoogleAuthController@initiate');
@@ -21,8 +21,8 @@ Route::get('/oauth2logout', 'GoogleAuthController@logout');
 
 Route::get('/harvests/harvest', 'HarvestsController@harvest');
 
-Route::get('/recordings', 'RecordingsController@index');
-Route::get('/recordings/{id}/hide', 'RecordingsController@hide');
+Route::get('/videos', 'VideosController@index');
+Route::get('/videos/{id}/hide', 'VideosController@hide');
 
 /*
  * Route::resource('events', 'EventsController');

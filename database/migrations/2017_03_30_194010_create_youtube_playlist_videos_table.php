@@ -16,7 +16,7 @@ class CreateYoutubePlaylistVideosTable extends Migration
             $table->increments('id');
 
             $table->integer('youtube_playlist_id')->unsigned();
-            $table->integer('recording_id')->unsigned();
+            $table->integer('youtube_video_id')->unsigned();
 
             $table->string('playlist_position');
 
@@ -24,8 +24,8 @@ class CreateYoutubePlaylistVideosTable extends Migration
                 ->references('id')->on('youtube_playlists')
                 ->onDelete('cascade');
 
-            $table->foreign('recording_id')
-                ->references('id')->on('recordings')
+            $table->foreign('youtube_video_id')
+                ->references('id')->on('youtube_videos')
                 ->onDelete('cascade');
 
         });

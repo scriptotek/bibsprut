@@ -144,7 +144,7 @@
           <a href="{{ $recording->youtubeLink('edit') }}" style="margin:0 0 0 10px;"><i class="zmdi zmdi-link"></i> Rediger på YouTube</a>
         @endif
 
-          <a href="{{ action('RecordingsController@hide', $recording->id) }}"><i class="zmdi zmdi-delete"></i> Skjul</a>
+          <a href="{{ action('VideosController@hide', $recording->id) }}"><i class="zmdi zmdi-delete"></i> Skjul</a>
         </div>
 
         <div>
