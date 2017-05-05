@@ -306,7 +306,7 @@ class YoutubeHarvestJob extends Job
             foreach ($accounts as $account) {
                 echo "Account: " . $account->userinfo['name'] . "\n";
                 $client = $account->getClient();
-                $youtube = $client->make('youtube');
+                $youtube = $client->make('YouTube');
 
                 $this->harvestCompletedLiveBroadcasts($youtube, $account);
                 $this->harvestLiveBroadcasts($youtube, $account);

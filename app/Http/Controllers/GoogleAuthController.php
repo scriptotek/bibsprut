@@ -67,7 +67,7 @@ class GoogleAuthController extends Controller
         $accessToken = $client->getAccessToken();
 
         $client->setAccessToken($accessToken);
-        $oauth2 = $clientFactory->make('OAuth2');
+        $oauth2 = $clientFactory->make('Oauth2');
         $userinfo = (array)$oauth2->userinfo->get()->toSimpleObject();
 
         $yt = $clientFactory->make('YouTube');
