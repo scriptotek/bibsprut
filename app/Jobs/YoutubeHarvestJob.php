@@ -69,7 +69,6 @@ class YoutubeHarvestJob extends Job
                     $vortexEvent->save();
                     $recording->vortex_event_id = $vortexEvent->id;
                 } catch (ScrapeException $exception) {
-                    echo 'Failed to scrape URL: ' . $vortexLink;
                     \Log::warning('Failed to scrape URL: ' . $vortexLink);
                 }
             }
@@ -154,8 +153,7 @@ class YoutubeHarvestJob extends Job
         ]);
 
         foreach ($videos->items as $broadcast) {
-            echo "- " . $broadcast->snippet->title . "\n";
-            // var_dump($broadcast);
+            \Log::debug("Got YouTube broadcast: {$broadcast->snippet->title}\n");
             $this->storeVideo($broadcast, $account);
         }
     }
@@ -171,7 +169,7 @@ class YoutubeHarvestJob extends Job
             // $videos = array_merge($videos, $response->items);
 
             foreach ($response->items as $broadcast) {
-                echo "- " . $broadcast->snippet->title . "\n";
+                \Log::debug("Got YouTube broadcast: {$broadcast->snippet->title}\n");
                 $this->storeVideo($broadcast, $account);
             }
 
@@ -195,7 +193,7 @@ class YoutubeHarvestJob extends Job
         }
 
         foreach ($videos as $video) {
-            echo "- " . $video->snippet->title . "\n";
+            \Log::debug("Got YouTube video: {$video->snippet->title}\n");
             $this->storeVideo($video, $account);
         }
     }
@@ -245,8 +243,6 @@ class YoutubeHarvestJob extends Job
         $ids = [];
         foreach ($videos as $video) {
             $ids[] = $video->id->videoId;
-//            echo "- " . $video->snippet->title . "\n";
-            // $this->storeVideo($video);
         }
         $this->harvestVideosFromIds($ids, $youtube, $account);
     }
@@ -264,8 +260,7 @@ class YoutubeHarvestJob extends Job
         foreach ($items as $response) {
 
             $id = $response->id;
-
-            echo "- " . $response->snippet->title . "\n";
+            \Log::debug("Got YouTube playlist: {$response->snippet->title}\n");
 
             $playlist = YoutubePlaylist::firstOrNew(['youtube_id' => $id]);
 
@@ -291,8 +286,7 @@ class YoutubeHarvestJob extends Job
     {
         $running = Harvest::whereNull('completed_at')->count();
         if ($running > 0) {
-            \Log::warning('Another harvest is already running. Exiting');
-            echo "Another harvest is already running. Exiting\n";
+            \Log::error('Another harvest is running or did not exit normally. Use -f to override.');
             return;
         }
 
@@ -300,11 +294,10 @@ class YoutubeHarvestJob extends Job
         try {
             $accounts = GoogleAccount::get();
             if (!count($accounts)) {
-                echo "No accounts configured\n";
-                \Log::warning('No accounts configured');
+                \Log::error('No accounts configured');
             }
             foreach ($accounts as $account) {
-                echo "Account: " . $account->userinfo['name'] . "\n";
+                \Log::debug("Harvesting YouTube data for account {$account->userinfo['name']}\n");
                 $client = $account->getClient();
                 $youtube = $client->make('YouTube');
 

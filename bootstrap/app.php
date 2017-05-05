@@ -43,6 +43,16 @@ $app->singleton(
 
 /*
 |--------------------------------------------------------------------------
+| Monolog config
+|--------------------------------------------------------------------------
+*/
+$app->configureMonologUsing(function ($monolog) {
+    $stdoutHandler = new Monolog\Handler\StreamHandler('php://stdout', Monolog\Logger::WARNING);
+    $monolog->pushHandler($stdoutHandler);
+});
+
+/*
+|--------------------------------------------------------------------------
 | Return The Application
 |--------------------------------------------------------------------------
 |
