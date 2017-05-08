@@ -49,6 +49,11 @@ $app->singleton(
 $app->configureMonologUsing(function ($monolog) {
     $stdoutHandler = new Monolog\Handler\StreamHandler('php://stdout', Monolog\Logger::WARNING);
     $monolog->pushHandler($stdoutHandler);
+
+    $path = app()->storagePath().'/logs/app.log';
+    $maxFiles = 7;
+    $fileHandler = new Monolog\Handler\RotatingFileHandler($path, $maxFiles, Monolog\Logger::INFO);
+    $monolog->pushHandler($fileHandler);
 });
 
 /*
