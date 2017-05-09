@@ -22,9 +22,10 @@ Route::get('/oauth2logout', 'GoogleAuthController@logout');
 Route::get('/harvests/harvest', 'HarvestsController@harvest');
 
 Route::get('/videos', 'VideosController@index');
-Route::get('/videos/{id}/hide', 'VideosController@hide')->middleware('auth');
+Route::get('/videos/{id}/hide', 'VideosController@hide')->middleware('can:edit');
 
 Route::get('user/activation/{token}', 'Auth\LoginController@activateUser')->name('user.activate');
+
 Route::resource('users', 'UsersController', ['only' => [
     'index', 'show'
 ]]);

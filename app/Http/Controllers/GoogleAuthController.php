@@ -13,7 +13,7 @@ class GoogleAuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('can:edit');
     }
 
     protected function logout(Request $request)

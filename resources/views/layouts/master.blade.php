@@ -72,6 +72,16 @@
         </div>
     </nav>
 
+    @if (Auth::check() && !Auth::user()->can('edit'))
+    <div class="container">
+        <div class="alert alert-warning">
+            <p>
+                🐙 Hei! Du er logget inn, men en administrator må aktivere kontoen din før du kan redigere.
+            </p>
+        </div>
+    </div>
+    @endif
+
     @if (Session::has('status'))
     <div class="container">
         <div class="alert alert-success">
@@ -102,16 +112,16 @@
               <div style="display: inline-block;background:#eee;border-radius: 15px; padding-right:8px;">
                   <img src="{{ $acc->userinfo['picture'] }}" style="width:30px; border-radius:15px;">
                   {{ $acc->userinfo['name'] }}
-                  @if (Auth::check())
+                  @can('edit')
                   <a href="{{ action('GoogleAuthController@logout', ['email' => $acc->id]) }}">[X]</a>
-                  @endif
+                  @endcan
               </div>
             @endforeach
-            @if (Auth::check())
+            @can('edit')
             <div style="display: inline-block;">
                 <a href="{{ action('GoogleAuthController@initiate') }}">Legg til</a>
             </div>
-            @endif
+            @endcan
         </div>
         @endif
 

@@ -26,6 +26,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         parent::registerPolicies($gate);
 
-        //
+        \Gate::define('edit', function ($user) {
+            return $user->activated;
+        });
     }
 }
