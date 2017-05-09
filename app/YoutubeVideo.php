@@ -44,13 +44,15 @@ class YoutubeVideo extends Model
             $recordingsMissingStartTime = static::whereNull('start_time')
                     ->get();
 
-            $events['missing_starttime'] = [
-                'recordings' => $recordingsMissingStartTime,
-                'vortexEvent' => null,
-                'playlist' => null,
-                'title' => null,
-                'publicVideos' => count($recordingsMissingStartTime),
-            ];
+            if (count($recordingsMissingStartTime)) {
+                $events['missing_starttime'] = [
+                    'recordings' => $recordingsMissingStartTime,
+                    'vortexEvent' => null,
+                    'playlist' => null,
+                    'title' => null,
+                    'publicVideos' => count($recordingsMissingStartTime),
+                ];
+            }
         }
 
         $recordings = static::orderBy('start_time', 'desc')
