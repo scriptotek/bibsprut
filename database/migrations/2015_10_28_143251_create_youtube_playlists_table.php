@@ -15,6 +15,7 @@ class CreateYoutubePlaylistsTable extends Migration
         Schema::create('youtube_playlists', function(Blueprint $table) {
             $table->increments('id');
             $table->string('youtube_id')->unique();
+            $table->string('account_id')->nullable();
 
             $table->string('title');
             $table->text('description');
