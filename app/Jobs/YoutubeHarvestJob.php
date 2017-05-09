@@ -9,6 +9,7 @@ use App\VortexEvent;
 use App\YoutubePlaylist;
 use App\YoutubeVideo;
 use Carbon\Carbon;
+use Generator;
 use Google_Service_YouTube;
 use PulkitJalan\Google\Client as GoogleClient;
 
@@ -30,7 +31,7 @@ class YoutubeHarvestJob extends Job
         return $matches[1];
     }
 
-    public function getPlaylistVideos($playlistId)
+    public function getPlaylistVideos($playlistId): array
     {
         $items = \Youtube::getPlaylistItemsByPlaylistId($playlistId);
         if ($items['results'] == false) {
@@ -40,17 +41,17 @@ class YoutubeHarvestJob extends Job
         return $items['results'];
     }
 
-    public function normalizeDateTime($date)
+    public function normalizeDateTime($date): Carbon
     {
         return Carbon::parse($date)->setTimezone('Europe/Oslo');
     }
 
-    public function normalizeDate($date)
+    public function normalizeDate($date): Carbon
     {
         return Carbon::parse($date);
     }
 
-    public function storeVideo($data, GoogleAccount $account)
+    public function storeVideo($data, GoogleAccount $account): YoutubeVideo
     {
         $recording = \App\YoutubeVideo::where(['youtube_id' => $data->id])->withTrashed()->first() ?: new \App\YoutubeVideo(['youtube_id' => $data->id]);
 
@@ -155,7 +156,7 @@ class YoutubeHarvestJob extends Job
         $playlist->videos()->sync($video_ids);
     }
 
-    public function harvestLiveBroadcasts(Google_Service_YouTube $youtube, GoogleAccount $account)
+    public function harvestLiveBroadcasts(Google_Service_YouTube $youtube, GoogleAccount $account): Generator
     {
         $videos = $youtube->liveBroadcasts->listLiveBroadcasts('id,snippet,status', [
             'broadcastStatus' => 'upcoming',
@@ -164,11 +165,11 @@ class YoutubeHarvestJob extends Job
 
         foreach ($videos->items as $broadcast) {
             \Log::debug("Got YouTube broadcast: {$broadcast->snippet->title}\n");
-            $this->storeVideo($broadcast, $account);
+            yield $this->storeVideo($broadcast, $account);
         }
     }
 
-    public function harvestCompletedLiveBroadcasts(Google_Service_YouTube $youtube, GoogleAccount $account)
+    public function harvestCompletedLiveBroadcasts(Google_Service_YouTube $youtube, GoogleAccount $account): Generator
     {
         $params = [
             'broadcastStatus' => 'completed',
@@ -189,7 +190,7 @@ class YoutubeHarvestJob extends Job
         } while ($response->nextPageToken);
     }
 
-    public function harvestVideosFromIds($ids, Google_Service_YouTube $youtube, GoogleAccount $account)
+    public function harvestVideosFromIds($ids, Google_Service_YouTube $youtube, GoogleAccount $account): Generator
     {
         // list buckets example
         $chunks = array_chunk($ids, 50);
@@ -204,11 +205,11 @@ class YoutubeHarvestJob extends Job
 
         foreach ($videos as $video) {
             \Log::debug("Got YouTube video: {$video->snippet->title}\n");
-            $this->storeVideo($video, $account);
+            yield $this->storeVideo($video, $account);
         }
     }
 
-    protected function search($params, Google_Service_YouTube $youtube)
+    protected function search($params, Google_Service_YouTube $youtube): array
     {
         $params['maxResults'] = 50;
         $videos = [];
@@ -224,7 +225,7 @@ class YoutubeHarvestJob extends Job
         return $videos;
     }
 
-    protected function playlists($params, Google_Service_YouTube $youtube)
+    protected function playlists($params, Google_Service_YouTube $youtube): array
     {
         $params['maxResults'] = 50;
         $playlists = [];
@@ -243,7 +244,7 @@ class YoutubeHarvestJob extends Job
     /*
      * Harvest all videos, both private and public
      */
-    public function harvestVideos(Google_Service_YouTube $youtube, GoogleAccount $account)
+    public function harvestVideos(Google_Service_YouTube $youtube, GoogleAccount $account): Generator
     {
         $videos = $this->search([
             'forMine' => true,
@@ -254,13 +255,15 @@ class YoutubeHarvestJob extends Job
         foreach ($videos as $video) {
             $ids[] = $video->id->videoId;
         }
-        $this->harvestVideosFromIds($ids, $youtube, $account);
+        foreach ($this->harvestVideosFromIds($ids, $youtube, $account) as $video) {
+            yield $video;
+        }
     }
 
     /*
      * Harvest all videos, both private and public
      */
-    public function harvestPlaylists(Google_Service_YouTube $youtube, GoogleAccount $account)
+    public function harvestPlaylists(Google_Service_YouTube $youtube, GoogleAccount $account): array
     {
         $items = $this->playlists([
             'mine' => true
