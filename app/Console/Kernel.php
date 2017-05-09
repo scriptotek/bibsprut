@@ -26,6 +26,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('harvest:youtube')
+            ->twiceDaily(13, 16)
+            ->emailOutputTo('d.m.heggo@ub.uio.no');
+
         $schedule->command('generate:vortex')
             ->everyThirtyMinutes()
             ->weekdays()
