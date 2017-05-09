@@ -7,6 +7,7 @@ use App\GoogleAccount;
 use App\Harvest;
 use App\VortexEvent;
 use App\YoutubePlaylist;
+use App\YoutubeVideo;
 use Carbon\Carbon;
 use Google_Service_YouTube;
 use PulkitJalan\Google\Client as GoogleClient;
@@ -135,6 +136,8 @@ class YoutubeHarvestJob extends Job
         $recording->youtube_meta = $meta;
 
         $recording->save();
+
+        return $recording;
     }
 
     public function harvestPlaylistVideos($playlistId)
@@ -177,7 +180,7 @@ class YoutubeHarvestJob extends Job
 
             foreach ($response->items as $broadcast) {
                 \Log::debug("Got YouTube broadcast: {$broadcast->snippet->title}\n");
-                $this->storeVideo($broadcast, $account);
+                yield $this->storeVideo($broadcast, $account);
             }
 
             if ($response->nextPageToken) {
@@ -282,7 +285,7 @@ class YoutubeHarvestJob extends Job
             $ids[] = $id;
         }
 
-        // TODO: Delete any playlists in DB with youtube_id NOT IN $ids
+        return $ids;
     }
 
     /**
@@ -313,10 +316,34 @@ class YoutubeHarvestJob extends Job
                 $client = $account->getClient();
                 $youtube = $client->make('YouTube');
 
-                $this->harvestCompletedLiveBroadcasts($youtube, $account);
-                $this->harvestLiveBroadcasts($youtube, $account);
-                $this->harvestVideos($youtube, $account);
-                $this->harvestPlaylists($youtube, $account);
+                // Harvest videos
+                $videos = array_merge(
+                    iterator_to_array($this->harvestCompletedLiveBroadcasts($youtube, $account)),
+                    iterator_to_array($this->harvestLiveBroadcasts($youtube, $account)),
+                    iterator_to_array($this->harvestVideos($youtube, $account))
+                );
+                $ids = array_map(function($video) {
+                    return $video->youtube_id;
+                }, $videos);
+
+                // Purge videos that have been deleted on YouTube
+                foreach (YoutubeVideo::where('account_id', '=', $account->id)->get() as $video) {
+                    if (!in_array($video->youtube_id, $ids)) {
+                        \Log::info("The video {$video->youtube_id} '" . $video->yt('title') . "' has been deleted on YouTube. Marking as deleted.");
+                        $video->delete();
+                    }
+                }
+
+                // Harvest playlists
+                $ids = $this->harvestPlaylists($youtube, $account);
+
+                // Purge playlists that have been deleted on YouTube
+                foreach (YoutubePlaylist::where('account_id', '=', $account->id)->get() as $playlist) {
+                    if (!in_array($playlist->youtube_id, $ids)) {
+                        \Log::info("The playlist {$playlist->youtube_id} '{$playlist->title}' has been deleted on YouTube. Marking as deleted.");
+                        $playlist->delete();
+                    }
+                }
             }
         } finally {
             $harvest->delete();
