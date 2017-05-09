@@ -4,7 +4,6 @@
     <title>Blekkio</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{{ URL::to('css/app.css') }}">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
     <!--
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap-theme.min.css">
@@ -13,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.8.4/jquery.timepicker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.2.0/min/dropzone.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ URL::to('css/app.css') }}">
     @yield('head')
 </head>
 <body>
@@ -32,7 +32,7 @@
 
                 <!-- Branding Image -->
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <!--<img src="/images/uio-app-small-black-eng-responsive.png" alt="">-->
+                    🐙
                     Blekkio
                 </a>
             </div>
@@ -44,11 +44,12 @@
                     <!-- Authentication Links -->
                     @if (Auth::guest())
                         <li>
-                            <a href="{{ url('/saml2/login') }}">Login</a>
+                            <a href="{{ url('/saml2/login') }}"><i class="zmdi zmdi-account-box"></i> Login</a>
                         </li>
                     @else
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                <i class="zmdi zmdi-account-box"></i>
                                 {{ Auth::user()->name }} <span class="caret"></span>
                             </a>
 
@@ -76,7 +77,7 @@
     <div class="container">
         <div class="alert alert-warning">
             <p>
-                🐙 Hei! Du er logget inn, men en administrator må aktivere kontoen din før du kan redigere.
+                Hei! Du er logget inn, men en administrator må aktivere kontoen din før du kan redigere.
             </p>
         </div>
     </div>
@@ -125,17 +126,19 @@
         </div>
         @endif
 
-        @if (isset($lastHarvest))
-            <div>
-                Sist oppdatert:
+        <div>
+            Sist oppdatert:
+            @if ($lastHarvest)
                 @if ($lastHarvest->completed_at)
                     {{ $lastHarvest->completed_at->tz('Europe/Oslo')->formatLocalized('%d. %B %Y, %H:%M') }}
                     <a href="{{ action('HarvestsController@harvest')  }}">Oppdater nå</a>
                 @else
                     <em>oppdatering pågår</em>
                 @endif
-            </div>
-        @endif
+            @else
+                aldri
+            @endif
+        </div>
 
         @yield('content')
     </div>

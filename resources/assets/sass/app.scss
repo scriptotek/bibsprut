@@ -8,6 +8,15 @@
 // Bootstrap
 //@import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
 
+body {
+  background-color: #f8f8f8;
+}
+.navbar-inverse .navbar-nav>li>a {
+  color: #fff;
+}
+.navbar-inverse .navbar-nav>li>a:hover {
+  background: #444;
+}
 .events {
   list-style-type: none;
   padding: 0;

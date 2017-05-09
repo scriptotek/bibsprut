@@ -31,7 +31,7 @@
   <ul class="events">
 @foreach ($events as $gid => $event)
 
-  <li class="{{ $event['recordings'][0]->upcoming() ? ' list-group-item-warning' : '' }}">
+  <li class="{{ count($event['recordings']) && $event['recordings'][0]->upcoming() ? ' list-group-item-warning' : '' }}">
 
   <div>
 
