@@ -8,7 +8,7 @@
             @foreach($users as $user)
                 <li>
                     <a href="{{ action('UsersController@show', $user->id) }}">{{ $user->name }}</a>
-                    ({{ $user->activate ? 'aktivert' : 'ikke aktivert' }})
+                    ({{ $user->activated ? 'aktivert' : 'ikke aktivert' }})
                 </li>
             @endforeach
         </ul>

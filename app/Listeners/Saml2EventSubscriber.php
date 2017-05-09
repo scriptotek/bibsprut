@@ -27,30 +27,23 @@ class Saml2EventSubscriber
         $uid = $data->getUserId();
         $attrs = $data->getAttributes();
 
-        if (!$attrs['uid'][0]) {
-            \Log::notice('No uid returned in SAML2 login event.');
+        if (!$attrs['eduPersonPrincipalName'][0]) {
+            \Log::notice('No eduPersonPrincipalName returned in SAML2 login event.');
             \Session::flash('error', 'An unknown error occured during login.');
             return;
         }
 
-        $feideId = $attrs['uid'][0] . '@uio.no';  // @TODO: Move default domain to config
-        $validUsers = ['dmheggo@uio.no'];  // @ TODO: Move to config
+        $feideId = $attrs['eduPersonPrincipalName'][0];  // @TODO: Move default domain to config
 
-        $user = User::where('feide_id', '=', $feideId)->firstOrNew();
+        $user = User::firstOrNew(['feide_id' => $feideId]);
 
         if (!$user->exists) {
             $user->name = $attrs['cn'][0];
-            $user->email = $attrs['mail'][0];
+            # $user->email = $attrs['mail'][0];
             $user->save();
 
             $this->activationService->sendActivationMail($user);
             \Log::notice('Registered new SAML user.', ['email' => $feideId]);
-        }
-
-        if (!$user->activated) {
-            \Session::flash('status', '🐙 Hei! En administrator må aktivere kontoen din før du kan fortsette.');
-
-            return;
         }
 
         $user->saml_id = $uid;
@@ -68,8 +61,6 @@ class Saml2EventSubscriber
      */
     public function onUserLogout(Saml2LogoutEvent $event)
     {
-        // die('Got logout event');
-
         $user = \Auth::user();
         if ($user) {
             $user->saml_id = null;

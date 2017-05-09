@@ -8,6 +8,7 @@ use App\GoogleAccount;
 use App\Harvest;
 use App\YoutubeVideo;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Mailer;
 
 class VideosController extends Controller
 {
@@ -17,7 +18,7 @@ class VideosController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, Mailer $mailer)
     {
         $lastHarvest = Harvest::orderBy('created_at', 'desc')->first();
 

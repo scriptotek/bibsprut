@@ -26,6 +26,12 @@ Setup:
 	npm run dev
 	cp .env.example .env
 
+Note: php-saml still depends on mcrypt as of 2017-05-09. To avoid having to install it, run
+
+    composer install --ignore-platform-reqs
+
+This is ok since we don't use encrypted SAML messages. See [php-saml#84](https://github.com/aacotroneo/laravel-saml2/issues/84).
+
 Add credentials (SQL, WebDAV, Google APIs) to `.env`.
 Local maintainers, see `\\kant\ub-felles\scriptotek\blekkio\README.txt`.
 

@@ -29,7 +29,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/';
+    protected $redirectTo = '/videos';
 
     /**
      * Create a new controller instance.
@@ -38,7 +38,7 @@ class LoginController extends Controller
      */
     public function __construct(ActivationService $activationService)
     {
-        $this->middleware('guest', ['except' => ['samlLogout']]);
+        $this->middleware('guest', ['except' => ['samlLogout', 'activateUser']]);
         $this->activationService = $activationService;
     }
 
@@ -64,11 +64,7 @@ class LoginController extends Controller
     {
         $user = \Auth::user();
 
-        if (!is_null($user->saml_session)) {
-            return \Saml2::logout('/', $user->saml_id, $user->saml_session);
-        }
-
-        return $this->logout($request);
+        return \Saml2::logout('/videos', $user->saml_id, $user->saml_session);
     }
 
     public function authenticated(Request $request, $user)
@@ -87,6 +83,8 @@ class LoginController extends Controller
             \Session::flash('status', 'The account was activated!');
             return redirect($this->redirectPath());
         }
-        abort(404);
+
+        \Session::flash('error', 'User already activated or not found!');
+        return redirect($this->redirectPath());
     }
 }
