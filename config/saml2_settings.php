@@ -88,7 +88,7 @@ return $settings = array(
      // Identity Provider Data that we want connect with our SP
      // https://weblogin.uio.no/simplesaml/saml2/idp/metadata.php?output=xhtml
      'idp' => array(
-         'entityId' => 'https://weblogin.uio.no',
+         'entityId' => 'https://weblogin.uio.no/simplesaml/saml2/idp/metadata.php',
          'singleSignOnService' => array(
              'url' => 'https://weblogin.uio.no/simplesaml/saml2/idp/SSOService.php',
          ),
