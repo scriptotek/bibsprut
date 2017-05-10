@@ -127,17 +127,19 @@
         @endif
 
         <div>
-            Sist oppdatert:
-            @if ($lastHarvest)
-                @if ($lastHarvest->completed_at)
-                    {{ $lastHarvest->completed_at->tz('Europe/Oslo')->formatLocalized('%d. %B %Y, %H:%M') }}
-                    <a href="{{ action('HarvestsController@harvest')  }}">Oppdater nå</a>
+            Siste høsting:
+            @if (isset($lastHarvest))
+                @if ($lastHarvest->deleted_at)
+                    {{ $lastHarvest->deleted_at->tz('Europe/Oslo')->formatLocalized('%d. %B %Y, %H:%M') }}
                 @else
                     <em>oppdatering pågår</em>
                 @endif
             @else
                 aldri
             @endif
+            @can('edit')
+                <a href="{{ action('HarvestsController@harvest')  }}">[Start høsting]</a>
+            @endcan
         </div>
 
         @yield('content')

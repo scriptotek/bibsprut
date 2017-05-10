@@ -20,7 +20,7 @@ class VideosController extends Controller
      */
     public function index(Request $request, Mailer $mailer)
     {
-        $lastHarvest = Harvest::orderBy('created_at', 'desc')->first();
+        $lastHarvest = Harvest::withTrashed()->orderBy('created_at', 'desc')->first();
 
         $accounts = GoogleAccount::get();
 

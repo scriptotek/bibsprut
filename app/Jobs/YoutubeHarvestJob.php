@@ -11,9 +11,11 @@ use App\YoutubeVideo;
 use Carbon\Carbon;
 use Generator;
 use Google_Service_YouTube;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use PulkitJalan\Google\Client as GoogleClient;
 
-class YoutubeHarvestJob extends Job
+
+class YoutubeHarvestJob extends Job implements ShouldQueue
 {
     protected $force;
 

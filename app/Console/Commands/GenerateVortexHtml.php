@@ -4,8 +4,9 @@ namespace App\Console\Commands;
 
 use App\Jobs\GenerateVortexHtmlJob;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class GenerateVortexHtml extends Command
+class GenerateVortexHtml extends Command implements ShouldQueue
 {
     /**
      * The name and signature of the console command.

@@ -13,6 +13,31 @@ To activate the task scheduler, add this to `/etc/crontab`:
 
       *  *  *  *  * apache     php /path/to/blekkio/artisan schedule:run 1>> /dev/null 2>&1
 
+## Task queue
+
+To activate the [queue worker](https://laravel.com/docs/5.4/queues), set `QUEUE_DRIVER=database`
+in `.env` and add a supervisor configuration file `/etc/supervisord.d/blekkio.ini`:
+
+```
+[program:blekkio]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/blekkio/artisan queue:work database --sleep=3 --tries=3
+autostart=true
+autorestart=true
+user=apache
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/path/to/blekkio/storage/logs/worker.log
+```
+
+Then
+
+```
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start blekkio:*
+```
+
 ## Local development
 
 Requirements: PHP + [Composer](https://getcomposer.org), Node + NPM.

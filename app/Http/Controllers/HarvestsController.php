@@ -16,7 +16,7 @@ class HarvestsController extends Controller
     public function harvest(Request $request)
     {
         dispatch(
-            new YoutubeHarvestJob()
+            new YoutubeHarvestJob(false)
         );
 
         $request->session()->flash('status', 'Oppdatering startet');
