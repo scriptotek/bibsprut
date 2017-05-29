@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\HarvestYoutube::class,
         \App\Console\Commands\GenerateFeed::class,
         \App\Console\Commands\GenerateVortexHtml::class,
+        \App\Console\Commands\PubSub::class,
     ];
 
     /**
@@ -34,5 +35,10 @@ class Kernel extends ConsoleKernel
             ->everyThirtyMinutes()
             ->weekdays()
             ->between('12:00', '20:00');
+
+        // The pubsubhubbub subscriptions lasts 5 days, so we need to re-new
+        // them at latest every 5th day.
+        $schedule->command('pubsub:subscribe')
+            ->daily();
     }
 }

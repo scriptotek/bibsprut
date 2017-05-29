@@ -23,7 +23,9 @@
         "twig/twig": "^2.3",
         "aacotroneo/laravel-saml2": "^0.8.1",
         "sentry/sentry": "^1.6",
-        "sentry/sentry-laravel": "^0.7.0"
+        "sentry/sentry-laravel": "^0.7.0",
+        "pubsubhubbub/subscriber": "^1.1",
+        "danmichaelo/quitesimplexmlelement": "^0.4.2"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Exceptions\ScrapeException;
 use App\GoogleAccount;
 use App\Harvest;
+use App\Jobs\GenerateVortexHtmlJob;
 use App\VortexEvent;
 use App\YoutubePlaylist;
 use App\YoutubeVideo;
@@ -18,10 +19,12 @@ use PulkitJalan\Google\Client as GoogleClient;
 class YoutubeHarvestJob extends Job implements ShouldQueue
 {
     protected $force;
+    protected $options;
 
-    public function __construct($force)
+    public function __construct($force, $options=[])
     {
         $this->force = $force;
+        $this->options = $options;
     }
 
     public function vortexUrlFromText($text)
@@ -300,6 +303,30 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
      */
     public function handle()
     {
+        // Get a single video
+        $videoId = array_get($this->options, 'videoId');
+        $channelId = array_get($this->options, 'channelId');
+        if (!is_null($videoId) && !is_null($channelId)) {
+
+            $account = GoogleAccount::where('channel', 'LIKE', "%id\":\"{$channelId}%")->first();
+            $client = $account->getClient();
+            $youtube = $client->make('YouTube');
+
+            // We cannot know if the video is a live broadcast or a video, so we just harvest
+            // upcoming broadcasts, then tries to fetch the single video
+            \Log::info("[YoutubeHarvestJob] Fetching updated data for the video {$videoId}");
+            $videos = array_merge(
+                iterator_to_array($this->harvestLiveBroadcasts($youtube, $account)),
+                iterator_to_array($this->harvestVideosFromIds([$videoId], $youtube, $account))
+            );
+
+            dispatch(new GenerateVortexHtmlJob());
+
+            return;
+        }
+
+        // -----------------------
+
         $running = Harvest::first();
         if (!is_null($running)) {
             if ($this->force) {

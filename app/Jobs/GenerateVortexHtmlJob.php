@@ -5,8 +5,9 @@ namespace App\Jobs;
 use App\YoutubeVideo;
 use App\WebdavClient;
 use RuntimeException;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class GenerateVortexHtmlJob extends Job
+class GenerateVortexHtmlJob extends Job implements ShouldQueue
 {
     // Inspirasjon: Se http://feeds.feedburner.com/TEDTalks_video
 
@@ -117,7 +118,7 @@ class GenerateVortexHtmlJob extends Job
 
     ];
 
-    public function __construct($stdout)
+    public function __construct($stdout=false)
     {
         $this->stdout = $stdout;
     }
@@ -267,9 +268,9 @@ class GenerateVortexHtmlJob extends Job
             $body->properties->content = $newContent;
 
             $webdav->put($this->url, json_encode($body));
-            \Log::info('Updated Vortex page.');
+            \Log::info('[GenerateVortexHtmlJob] Updated Vortex page.');
         } else {
-            \Log::info('No need to update Vortex page, no changes.');
+            \Log::info('[GenerateVortexHtmlJob] No need to update Vortex page, no changes.');
         }
     }
 
