@@ -127,10 +127,26 @@ class GenerateVortexHtmlJob extends Job
             $playlist = null;
         }
 
-        if ($recording->vortexEvent && !is_null($recording->vortexEvent->start_time)) {
+
+        if (count($event['recordings']) > 1 && $recording->vortexEvent && !is_null($recording->vortexEvent->start_time)) {
+            // For events with multiple recordings, we get the start and end time from the Vortex event,
+            // since that covers the whole event.
             $when = $recording->vortexEvent;
-        } else {
+        } else if ($recording->vortexEvent && (is_null($recording->start_time) || is_null($recording->end_time))) {
+            // If start or end time is missing on the Youtube event, we also prefer the Vortex event.
+            $when = $recording->vortexEvent;
+        }  else {
+            // Otherwise, we get start and end time from the YouTube event, since the Vortex event may cover
+            // extra stuff which is not streamed (example: PhD Day, streaming: 14-15.30, vortex event: 11-18).
             $when = $recording;
+        }
+
+        if (count($event['recordings']) == 1) {
+            // Use title from YouTube event
+            $title = $recording->yt('title');
+        } else {
+            // Use title from Vortex event
+            $title = $event['title'];
         }
 
         $recordings = array_map([$this, 'formatRecording'], $event['recordings']);
@@ -138,7 +154,7 @@ class GenerateVortexHtmlJob extends Job
         return [
             'playlist' => $playlist,
             'publicVideos' => $event['publicVideos'],
-            'title' => $event['title'], // $recording->yt('title'),
+            'title' => $title, // $recording->yt('title'),
             'when' => $when,
             'vortex' => $recording->vortexEvent,
             'youtube' => $recording->youtube_meta,
@@ -228,6 +244,9 @@ class GenerateVortexHtmlJob extends Job
             $body->properties->content = $newContent;
 
             $webdav->put($this->url, json_encode($body));
+            \Log::info('Updated Vortex page.');
+        } else {
+            \Log::info('No need to update Vortex page, no changes.');
         }
     }
 
