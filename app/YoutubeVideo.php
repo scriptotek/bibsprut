@@ -144,10 +144,19 @@ class YoutubeVideo extends Model
         return $this->belongsTo('App\Presentation');
     }
 
-    public function youtubeDescriptionAsHtml()
+    public function youtubeDescriptionAsHtml($options=[])
     {
+        $txt = $this->yt('description');
+        if (array_get($options, 'withoutLinks')) {
+            $txt = preg_replace('/https?:\/\/[^\s]+/', '', $txt);
+        }
+
+        if (array_get($options, 'firstParagraphOnly')) {
+            $txt = explode("\n\n", $txt)[0];
+        }
+
         $parser = new GithubMarkdown();
-        return $parser->parse($this->yt('description'));
+        return $parser->parse($txt);
     }
 
     public function youtubeLink($method='watch')

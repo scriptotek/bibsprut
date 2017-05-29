@@ -28,6 +28,9 @@ class GenerateVortexHtmlJob extends Job
 <div class="time-and-place">{{ nextEvent.when | datetimeformat("%e. %B %Y") }},
     <a href="{{ nextEvent.vortex.location_map_url }}">{{ nextEvent.vortex.location }}</a>
 </div>
+<div class="vrtx-event-component-introduction">
+    {{ nextEvent.description | raw }}
+</div>
 <div>
     <iframe width="560" height="315" src="{{ nextEvent.embedLink }}" frameborder="0" allowfullscreen></iframe>
 </div>
@@ -36,18 +39,34 @@ class GenerateVortexHtmlJob extends Job
 {% endif %}
 
 <h2>Kommende sendinger</h2>
-<ul>
+
 {% for event in upcomingEvents %}
-    <li>
-        <div class="vrtx-title">
-            <a class="vrtx-title summary" href="{{ event.vortex.url }}">{{ event.title }}</a>
+
+<div class="vrtx-event-component">
+    <div class="vrtx-event-component-item">
+
+        <div class="vrtx-event-component-picture">
+            <a class="vrtx-image" href="{{ event.youtubeLink }}" aria-hidden="true" tabindex="-1">
+                <img src="{{ event.thumbnail }}" alt="">
+            </a>
         </div>
-        <div class="time-and-place">{{ event.when | datetimeformat("%e. %B %Y") }},
-        <a href="{{ event.vortex.location_map_url }}">{{ event.vortex.location }}</a>
+
+        <div class="vrtx-event-component-title">
+            <a class="vrtx-event-component-title summary" href="{{ event.vortex.url }}">{{ event.title }}</a>
         </div>
-    </li>
+
+        <div class="vrtx-event-component-misc">
+            <span class="vrtx-event-component-start-and-end-time">{{ event.when | datetimeformat("%e. %B %Y") }},
+            <a href="{{ event.vortex.location_map_url }}">{{ event.vortex.location }}</a></span>
+        </div>
+
+        <div class="vrtx-event-component-introduction">
+            {{ event.description | raw }}
+        </div>
+    </div>
+</div>
+
 {% endfor %}
-</ul>
 
 <h2>Tidligere sendinger</h2>
 
@@ -161,6 +180,10 @@ class GenerateVortexHtmlJob extends Job
             'youtubeLink' => $youtubeLink,
             'embedLink' => $recording->youtubeLink('embed'),
             'recordings' => $recordings,
+            'thumbnail' => $recording->yt('thumbnail'),
+            'description' => $recording->youtubeDescriptionAsHtml([
+                'firstParagraphOnly' => true,
+            ]),
         ];
     }
 
