@@ -13,14 +13,15 @@ class GenerateVortexHtml extends Command implements ShouldQueue
      *
      * @var string
      */
-    protected $signature = 'generate:vortex';
+    protected $signature = 'generate:vortex
+                            {--stdout : Print to stdout rather than save to Vortex}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate Vortex HTML.';
+    protected $description = 'Generate HTML for ub.uio.no/live';
 
     /**
      * Create a new command instance.
@@ -39,8 +40,7 @@ class GenerateVortexHtml extends Command implements ShouldQueue
      */
     public function handle()
     {
-        dispatch(
-            new GenerateVortexHtmlJob()
-        );
+        $job = new GenerateVortexHtmlJob($this->option('stdout'));
+        dispatch($job);
     }
 }

@@ -12,6 +12,8 @@ class GenerateVortexHtmlJob extends Job
 
     protected $url = 'https://www.ub.uio.no/kurs-arrangement/live/index.html';
 
+    protected $stdout = false; // Print to stdout rather than saving to Vortex
+
     protected $maxUpcoming = 4;  // Max number of upcoming events to show
 
     protected $templates = [
@@ -95,6 +97,11 @@ class GenerateVortexHtmlJob extends Job
 </li>',
 
     ];
+
+    public function __construct($stdout)
+    {
+        $this->stdout = $stdout;
+    }
 
     public function formatRecording($rec)
     {
@@ -210,6 +217,12 @@ class GenerateVortexHtmlJob extends Job
         }
 
         $newContent = $this->generateHtml();
+
+        if ($this->stdout) {
+            echo $newContent . "\n";
+            return;
+        }
+
         $newContent = $spl[0] . '<!-- Start:Blekkio -->' . $newContent . '<!-- End:Blekkio -->' . $spl2[1];
         if ($body->properties->content != $newContent) {
             $body->properties->content = $newContent;
