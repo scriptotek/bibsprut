@@ -47,7 +47,7 @@ $app->singleton(
 |--------------------------------------------------------------------------
 */
 $app->configureMonologUsing(function ($monolog) {
-    $stdoutHandler = new Monolog\Handler\StreamHandler('php://stdout', Monolog\Logger::WARNING);
+    $stdoutHandler = new Monolog\Handler\StreamHandler('php://stdout', Monolog\Logger::DEBUG);
     $monolog->pushHandler($stdoutHandler);
 
     $path = app()->storagePath().'/logs/app.log';
