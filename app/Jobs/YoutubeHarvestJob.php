@@ -60,6 +60,8 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
     {
         $recording = \App\YoutubeVideo::where(['youtube_id' => $data->id])->withTrashed()->first() ?: new \App\YoutubeVideo(['youtube_id' => $data->id]);
 
+        $recording->restore();  // if trashed
+
         $recording->account_id = $account->id;
 
         $creating = $recording->isDirty();
