@@ -137,15 +137,17 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         }
 
         if ($creating) {
-            \Log::info('Adding YouTube video: ' . $data->id);
+            \Log::info('[YoutubeHarvestJob] Adding YouTube video: ' . $data->id);
         } else if ($recording->isDirty()) {
             //var_dump($recording->getDirty());
-            \Log::info('Updating YouTube video: ' . $data->id);
+            \Log::info('[YoutubeHarvestJob] Updating YouTube video: ' . $data->id);
         }
 
         $recording->youtube_meta = $meta;
 
-        $recording->save();
+        if (!$recording->save()) {
+            \Log::error('[YoutubeHarvestJob] Failed to store ' . $data->id);
+        }
 
         return $recording;
     }
@@ -173,7 +175,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         ]);
 
         foreach ($videos->items as $broadcast) {
-            \Log::debug("Got YouTube broadcast: {$broadcast->snippet->title}\n");
+            \Log::debug("[YoutubeHarvestJob] Got YouTube broadcast: {$broadcast->snippet->title}\n");
             yield $this->storeVideo($broadcast, $account);
         }
     }
