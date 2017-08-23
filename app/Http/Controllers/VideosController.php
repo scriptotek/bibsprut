@@ -44,6 +44,40 @@ class VideosController extends Controller
     }
 
     /**
+     * Display a listing of the resource as a feed.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function feed(Request $request)
+    {
+        $lastHarvest = Harvest::withTrashed()->orderBy('created_at', 'desc')->first();
+
+        $limit = intval($request->input('limit', 10));
+
+        $events = [];
+        $n = 0;
+        foreach (YoutubeVideo::events(false, false) as $gid => $event) {
+            if (!count($event['recordings'])) continue;
+            if ($event['recordings'][0]->upcoming()) continue;
+            if (is_null($event['vortexEvent'])) continue;
+            if (!$event['publicVideos']) continue;
+            // if (!$event->account->id =!=) continue;
+
+            $events[$gid] = $event;
+            $n++;
+            if ($n >= $limit) break;
+        }
+
+        return response()
+            ->view('recordings.feed', [
+                'events' => $events,
+            ])
+            ->header('Content-Type', 'application/xml')
+            ;
+    }
+
+    /**
      * Hide a resource.
      *
      * @param Request $request

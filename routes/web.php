@@ -23,6 +23,7 @@ Route::get('/harvests/harvest', 'HarvestsController@harvest');
 
 Route::get('/videos', 'VideosController@index');
 Route::get('/videos/{id}/hide', 'VideosController@hide')->middleware('can:edit');
+Route::get('/feed', 'VideosController@feed');
 
 Route::get('user/activation/{token}', 'Auth\LoginController@activateUser')->name('user.activate');
 
