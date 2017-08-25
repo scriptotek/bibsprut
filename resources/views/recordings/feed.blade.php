@@ -15,7 +15,11 @@
       @else
       <media:embed url="{{ $event['recordings'][0]->youtubeLink('embed') }}" />
       @endif
+      @if ($event['vortexEvent']->thumbnail)
+      <media:content url="{{ $event['vortexEvent']->thumbnail }}" />
+      @else
       <media:content url="{{ array_get($event['recordings'][0]->youtube_meta, 'thumbnail') }}" />
+      @endif
       <description><![CDATA[
         {!! $event['recordings'][0]->youtubeDescriptionAsHtml() !!}
       ]]></description>
