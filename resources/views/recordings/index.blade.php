@@ -35,9 +35,14 @@
 
   <div>
 
+    @if (!is_null($event['vortexEvent']) && !is_null($event['vortexEvent']->thumbnail))
+      <img src="{{ $event['vortexEvent']->thumbnail }}" style="width:260px; float:right;" title="Vortex thumb for Titan">
+    @endif
+
     @if (!is_null($event['vortexEvent']))
       {{ $event['vortexEvent']->formatStartEndDateTime() }}
     @endif
+
 
     <strong>{{ $event['title'] }}</strong>
 
@@ -165,6 +170,7 @@
 
       </div>
     </div>
+    <div style="clear:both"></div>
 </li>
 @endforeach
 </ul>
