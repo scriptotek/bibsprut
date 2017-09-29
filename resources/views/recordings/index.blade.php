@@ -55,7 +55,7 @@
       @if ($event['vortexEvent'])
       <a href="{{ $event['vortexEvent']->url }}" style="margin:0 0 0 10px;">
         <i class="zmdi zmdi-link"></i>
-        Vortex
+        Arrangement
       </a>
       @endif
 
@@ -73,10 +73,10 @@
       @if ($event['vortexEvent'])
           <a href="{{ $event['vortexEvent']->url }}" style="margin:0 0 0 10px;">
             <i class="zmdi zmdi-link"></i>
-            Vortex
+            Arrangement
           </a>
       @else
-        <span style="background:#FF9F4F; color: white; display:inline-block; border-radius: 3px; padding: 0 3px; margin: 0 1px;">Lenke til Vortex mangler</span>
+        <span style="background:#FF9F4F; color: white; display:inline-block; border-radius: 3px; padding: 0 3px; margin: 0 1px;">Lenke til arrangement mangler</span>
       @endif
 
     @endif

@@ -32,6 +32,9 @@ class YoutubeVideo extends Model
         if (!is_null($this->end_time) && $this->end_time < $now) {
             return false;
         }
+        if (!is_null($this->start_time) && $this->start_time < $now) {
+            return false;
+        }
 
         return true;
     }

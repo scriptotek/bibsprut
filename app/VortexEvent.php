@@ -52,7 +52,8 @@ class VortexEvent extends Model
         if (empty($this->url)) {
             return;
         }
-        if (!empty($this->text) && !empty($this->thumbnail)) {
+
+        if (!empty($this->text) && !empty($this->thumbnail) && !empty($this->start_time) && $this->start_time < Carbon::now()) {
             return;
         }
 
@@ -64,20 +65,22 @@ class VortexEvent extends Model
         $crawler = $client->request('GET', $this->url);
         $response = $client->getResponse();
         if ($response->getStatus() != 200) {
-            throw new ScrapeException('Could not get URL ' . $this->url);
+            throw new ScrapeException('Could not scrape <' . $this->url . '>, got ' . $response->getStatus() . ' response');
         }
 
         $crawler->filter('.vevent .dtstart')->each(function (Crawler $node) {
             $this->start_time = Carbon::parse($node->attr('title'));
         });
 
-        if (!$this->start_time) {
-            throw new ScrapeException('Not a valid Vortex event page: ' . $this->url);
-        }
-
         $crawler->filter('#vrtx-content h1')->each(function (Crawler $node) {
             $this->title = trim($node->text());
         });
+
+        if (is_null($this->title)) {
+            $crawler->filter('title')->each(function (Crawler $node) {
+                $this->title = trim($node->text());
+        });
+        }
 
         $crawler->filter('.vrtx-introduction-image img')->each(function (Crawler $node) use ($domain) {
             $this->thumbnail = $node->attr('src');

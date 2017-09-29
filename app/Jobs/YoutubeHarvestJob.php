@@ -29,7 +29,8 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
 
     public function vortexUrlFromText($text)
     {
-        $pattern = '/(https?:\/\/[^\s]+.uio.no\/[^\s]+)/';
+        $allowedDomains = ['uio.no', 'eajrs.net'];
+        $pattern = '/(https?:\/\/[^\s]+\.?(' . implode('|', $allowedDomains) . ')\/[^\s]+)/';
         if (!preg_match($pattern, $text, $matches)) {
             return null;
         }
@@ -83,11 +84,12 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
             } else {
                 try {
                     $vortexEvent = VortexEvent::where(['url' => $vortexLink])->withTrashed()->first() ?: new VortexEvent(['url' => $vortexLink]);
+                    \Log::debug('Scraping Vortex URL: ' . $vortexLink);
                     $vortexEvent->scrape();
                     $vortexEvent->save();
                     $recording->vortex_event_id = $vortexEvent->id;
                 } catch (ScrapeException $exception) {
-                    \Log::warning('Failed to scrape URL: ' . $vortexLink);
+                    \Log::warning($exception->getMessage());
                 }
             }
         }
@@ -112,8 +114,13 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         $meta['is_public'] = ($data->status->privacyStatus == 'public');
 
         if (isset($data->snippet->scheduledStartTime)) {
+            // Prefer scheduledStartTime
             $recording->start_time = $this->normalizeDateTime($data->snippet->scheduledStartTime);
+        } else if (isset($data->recordingDetails) && isset($data->recordingDetails->recordingDate)) {
+            // but use recordingDate if scheduledStartTime not set
+            $recording->start_time = $this->normalizeDate($data->recordingDetails->recordingDate);
         }
+
         if (isset($data->snippet->scheduledEndTime)) {
             $recording->end_time = $this->normalizeDateTime($data->snippet->scheduledEndTime);
         }
@@ -125,22 +132,17 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
             $meta['views'] = $data->statistics->viewCount;
         }
 
-        if (isset($data->recordingDetails) && isset($data->recordingDetails->recordingDate)) {
-            //var_dump($data->recordingDetails);
-            if (is_null($recording->start_time)) {
-                $recording->start_time = $this->normalizeDate($data->recordingDetails->recordingDate);
-            }
-        }
-
         if (isset($data->contentDetails) && isset($data->contentDetails->duration)) {
             $meta['duration'] = $data->contentDetails->duration;
         }
 
         if ($creating) {
-            \Log::info('[YoutubeHarvestJob] Adding YouTube video: ' . $data->id);
+            \Log::info('[YoutubeHarvestJob] Adding new YouTube video: ' . $data->id);
         } else if ($recording->isDirty()) {
             //var_dump($recording->getDirty());
-            \Log::info('[YoutubeHarvestJob] Updating YouTube video: ' . $data->id);
+            \Log::info('[YoutubeHarvestJob] Updating existing YouTube video: ' . $data->id);
+        } else {
+            \Log::debug('[YoutubeHarvestJob] No changes to YouTube video: ' . $data->id);
         }
 
         $recording->youtube_meta = $meta;
@@ -175,7 +177,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         ]);
 
         foreach ($videos->items as $broadcast) {
-            \Log::debug("[YoutubeHarvestJob] Got YouTube broadcast: {$broadcast->snippet->title}\n");
+            \Log::debug("[YoutubeHarvestJob] Processing YouTube broadcast: {$broadcast->snippet->title}\n");
             yield $this->storeVideo($broadcast, $account);
         }
     }
@@ -191,7 +193,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
             // $videos = array_merge($videos, $response->items);
 
             foreach ($response->items as $broadcast) {
-                \Log::debug("Got YouTube broadcast: {$broadcast->snippet->title}\n");
+                \Log::debug("[YoutubeHarvestJob] Processing YouTube broadcast: {$broadcast->snippet->title}\n");
                 yield $this->storeVideo($broadcast, $account);
             }
 
@@ -215,7 +217,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         }
 
         foreach ($videos as $video) {
-            \Log::debug("Got YouTube video: {$video->snippet->title}\n");
+            \Log::debug("[YoutubeHarvestJob] Processing YouTube video: {$video->snippet->title}\n");
             yield $this->storeVideo($video, $account);
         }
     }
@@ -284,7 +286,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         foreach ($items as $response) {
 
             $id = $response->id;
-            \Log::debug("Got YouTube playlist: {$response->snippet->title}\n");
+            \Log::debug("[YoutubeHarvestJob] YouTube playlist: {$response->snippet->title}\n");
 
             $playlist = YoutubePlaylist::firstOrNew(['youtube_id' => $id]);
 
@@ -350,7 +352,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
                 \Log::error('No accounts configured');
             }
             foreach ($accounts as $account) {
-                \Log::debug("Harvesting YouTube data for account {$account->userinfo['name']}\n");
+                \Log::debug("[YoutubeHarvestJob] Harvesting YouTube data for account {$account->userinfo['name']}\n");
                 $client = $account->getClient();
                 $youtube = $client->make('YouTube');
 
