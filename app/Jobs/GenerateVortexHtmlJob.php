@@ -39,7 +39,9 @@ class GenerateVortexHtmlJob extends Job implements ShouldQueue
 <em>Ingen planlagte</em>
 {% endif %}
 
+{% if upcomingEvents %}
 <h2>Kommende sendinger</h2>
+{% endif %}
 
 {% for event in upcomingEvents %}
 
