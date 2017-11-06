@@ -127,21 +127,28 @@
         </div>
         @endif
 
-        <div>
-            Siste høsting:
+        <div style="margin-top: 1em;">
+            Siste fullstendige høsting:
             @if (isset($lastHarvest))
                 @if ($lastHarvest->deleted_at)
                     {{ $lastHarvest->deleted_at->tz('Europe/Oslo')->formatLocalized('%d. %B %Y, %H:%M') }}
                 @else
-                    <em>oppdatering pågår</em>
+                    <em>oppdatering pågår (last siden på nytt for å sjekke om den er ferdig)</em>
                 @endif
             @else
                 aldri
             @endif
             @can('edit')
-                <a href="{{ action('HarvestsController@harvest')  }}">[Start høsting]</a>
+                @if (!isset($lastHarvest) || $lastHarvest->deleted_at)
+                    <a class="btn btn-primary" href="{{ action('HarvestsController@harvest')  }}">Start ny høsting (tilkall blekkspruten)</a>
+                @endif
             @endcan
         </div>
+        <p style="margin-top: 1em;">
+            Hvordan funker dette? Blekkio oppdaterer enkeltvideor når den får et ping fra YouTube, men det kan av og til bli krøll.
+            Hvis det blir krøll, logg inn og trykk "Start ny høsting (tilkall blekkspruten)" for å gjøre en fullstendig
+            høsting (tar 1-2 minutter) fulgt av en oppdatering av UB live. Fullstendige høstinger gjøres også automatisk 2 ganger i døgnet.
+        </p>
 
         @yield('content')
     </div>
