@@ -40,9 +40,7 @@ class GenerateFeed extends Command
     public function handle()
     {
         //$this->info('Generating feed');
-        dispatch(
-            new GenerateFeedJob()
-        );
+        GenerateFeedJob::dispatch();
         //$this->info('Done');
     }
 }

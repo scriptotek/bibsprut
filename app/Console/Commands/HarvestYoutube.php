@@ -38,9 +38,7 @@ class HarvestYoutube extends Command
     {
         $this->info('Harvesting video metadata from Youtube');
         $force = $this->option('force');
-        dispatch(
-            new YoutubeHarvestJob($force)
-        );
+        YoutubeHarvestJob::dispatch($force);
         $this->info('Done');
     }
 }

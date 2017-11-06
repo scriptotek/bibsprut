@@ -40,7 +40,6 @@ class GenerateVortexHtml extends Command implements ShouldQueue
      */
     public function handle()
     {
-        $job = new GenerateVortexHtmlJob($this->option('stdout'));
-        dispatch($job);
+        GenerateVortexHtmlJob::dispatch($this->option('stdout'));
     }
 }

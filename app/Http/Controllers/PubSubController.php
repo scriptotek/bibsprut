@@ -40,12 +40,10 @@ class PubSubController extends Controller
         $channelId = $xml->text('atom:entry/yt:channelId');
         \Log::info("[PubSubController] Got push notification from YouTube: Video : {$videoId} at channel {$channelId} was changed.");
 
-        dispatch(
-            new YoutubeHarvestJob(false, [
-                'videoId' => $videoId,
-                'channelId' => $channelId,
-            ])
-        );
+        YoutubeHarvestJob::dispatch(false, [
+            'videoId' => $videoId,
+            'channelId' => $channelId,
+        ]);
 
         return response('OK', 200);
     }

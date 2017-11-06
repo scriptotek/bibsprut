@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\YoutubeHarvestJob;
+use App\Jobs\GenerateVortexHtmlJob;
 use Illuminate\Http\Request;
 
 class HarvestsController extends Controller
@@ -15,9 +16,9 @@ class HarvestsController extends Controller
 
     public function harvest(Request $request)
     {
-        dispatch(
-            new YoutubeHarvestJob(false)
-        );
+        YoutubeHarvestJob::withChain([
+            new GenerateVortexHtmlJob,
+        ])->dispatch();
 
         $request->session()->flash('status', 'Oppdatering startet');
 

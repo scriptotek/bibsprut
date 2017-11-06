@@ -21,7 +21,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
     protected $force;
     protected $options;
 
-    public function __construct($force, $options=[])
+    public function __construct($force=false, $options=[])
     {
         $this->force = $force;
         $this->options = $options;
@@ -328,7 +328,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
                 iterator_to_array($this->harvestVideosFromIds([$videoId], $youtube, $account))
             );
 
-            dispatch(new GenerateVortexHtmlJob());
+            GenerateVortexHtmlJob::dispatch();
 
             return;
         }

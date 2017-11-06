@@ -5,10 +5,10 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": ">=5.6.4",
-        "laravel/framework": "5.4.*",
+        "php": ">=7.0.0",
+        "laravel/framework": "5.5.*",
         "alaouy/youtube": "~1.2",
-        "graham-campbell/markdown": "~7.1",
+        "graham-campbell/markdown": "~8.0",
         "cebe/markdown": "~1.1",
         "sabre/dav": "~3.0",
         "pulkitjalan/google-apiclient": "~3.1",
@@ -17,7 +17,7 @@
         "ramsey/uuid": "~3.0",
         "php-ffmpeg/php-ffmpeg": "0.6.*",
         "league/flysystem-webdav": "~1.0",
-        "laravelcollective/html": "5.4.*",
+        "laravelcollective/html": "5.5.*",
         "fabpot/goutte": "^3.2",
         "laravel/tinker": "^1.0",
         "twig/twig": "^2.3",
@@ -54,10 +54,6 @@
         ],
         "post-create-project-cmd": [
             "php artisan key:generate"
-        ],
-        "post-install-cmd": [
-            "Illuminate\\Foundation\\ComposerScripts::postInstall",
-            "php artisan optimize"
         ],
         "post-update-cmd": [
             "Illuminate\\Foundation\\ComposerScripts::postUpdate",
