@@ -29,7 +29,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
 
     public function vortexUrlFromText($text)
     {
-        $allowedDomains = ['uio.no', 'eajrs.net'];
+        $allowedDomains = ['uio.no', 'eajrs.net', 'bio.no'];
         $pattern = '/(https?:\/\/[^\s]+\.?(' . implode('|', $allowedDomains) . ')\/[^\s]+)/';
         if (!preg_match($pattern, $text, $matches)) {
             return null;
