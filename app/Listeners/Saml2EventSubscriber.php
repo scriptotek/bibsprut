@@ -39,11 +39,11 @@ class Saml2EventSubscriber
 
         if (!$user->exists) {
             $user->name = $attrs['cn'][0];
-            # $user->email = $attrs['mail'][0];
+            $user->email = $attrs['mail'][0];
             $user->save();
 
             $this->activationService->sendActivationMail($user);
-            \Log::notice('Registered new SAML user.', ['email' => $feideId]);
+            \Log::notice('Registered new SAML user.', ['feide' => $feideId]);
         }
 
         $user->saml_id = $uid;
