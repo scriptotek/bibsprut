@@ -36,4 +36,20 @@ class User extends Model implements AuthenticatableContract,
      * @var array
      */
     protected $hidden = ['password', 'remember_token'];
+
+    /**
+     * Get the user tokens for the user.
+     */
+    public function tokens()
+    {
+        return $this->hasMany('App\UserToken');
+    }
+
+    public function getToken($tokenType)
+    {
+        return $this->tokens()
+            ->where('user_id', '=', $this->id)
+            ->where('token_type', '=', $tokenType)
+            ->first();
+    }
 }

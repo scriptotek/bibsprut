@@ -26,6 +26,7 @@ Route::get('/videos/{id}/hide', 'VideosController@hide')->middleware('can:edit')
 Route::get('/feed', 'VideosController@feed');
 
 Route::get('user/activation/{token}', 'Auth\LoginController@activateUser')->name('user.activate');
+Route::get('user/cancel/{token}', 'Auth\LoginController@cancelActivation')->name('user.cancel');
 
 Route::resource('users', 'UsersController', ['only' => [
     'index', 'show'

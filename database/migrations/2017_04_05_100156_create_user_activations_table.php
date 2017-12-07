@@ -13,10 +13,14 @@ class CreateUserActivationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_activations', function (Blueprint $table) {
-            $table->increments('user_id')->unsigned();
+        Schema::create('user_tokens', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('user_id')->unsigned();
             $table->string('token')->index();
+            $table->string('token_type')->index();
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -27,6 +31,6 @@ class CreateUserActivationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_activations');
+        Schema::dropIfExists('user_tokens');
     }
 }

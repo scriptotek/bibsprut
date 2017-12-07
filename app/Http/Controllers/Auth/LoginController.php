@@ -38,11 +38,11 @@ class LoginController extends Controller
      */
     public function __construct(ActivationService $activationService)
     {
-        $this->middleware('guest', ['except' => ['samlLogout', 'activateUser']]);
+        $this->middleware('guest', ['except' => ['samlLogout', 'activateUser', 'cancelActivation']]);
         $this->activationService = $activationService;
     }
 
-        /**
+    /**
      * Display SAML errors.
      *
      * @return \Illuminate\Http\Response
@@ -81,6 +81,17 @@ class LoginController extends Controller
     {
         if ($user = $this->activationService->activateUser($token)) {
             \Session::flash('status', 'The account was activated!');
+            return redirect($this->redirectPath());
+        }
+
+        \Session::flash('error', 'User already activated or not found!');
+        return redirect($this->redirectPath());
+    }
+
+    public function cancelActivation($token)
+    {
+        if ($user = $this->activationService->cancelActivation($token)) {
+            \Session::flash('status', 'Your account has been removed!');
             return redirect($this->redirectPath());
         }
 

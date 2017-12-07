@@ -2,24 +2,29 @@
 
 namespace App;
 
+use App\Mail\NewUserAccountActivated;
+use App\Mail\AdminNoticeNewUserCancelled;
+use App\Mail\AdminNoticeNewUserPending;
+use App\Mail\NewUserActivationCancelled;
+use App\Mail\NewUserActivationPending;
 use Illuminate\Mail\Mailer;
-use Illuminate\Mail\Message;
+use Illuminate\Support\Facades\Mail;
 
 class ActivationService
 {
 
     protected $mailer;
 
-    protected $activationRepo;
+    protected $tokenRepo;
 
     protected $resendAfter = 24;
 
     protected $adminEmail;
 
-    public function __construct(Mailer $mailer, ActivationRepository $activationRepo)
+    public function __construct(Mailer $mailer, TokenRepository $tokenRepo)
     {
         $this->mailer = $mailer;
-        $this->activationRepo = $activationRepo;
+        $this->tokenRepo = $tokenRepo;
         $this->adminEmail = config('auth.activation_admin_email');
     }
 
@@ -29,54 +34,69 @@ class ActivationService
             return;
         }
 
-        // Mail to admin
-        $token = $this->activationRepo->createActivation($user);
-        $link = route('user.activate', $token);
-        $message = "Hi,\n\nA new user just logged in:\n\n  Name: {$user->name}\n  E-mail: {$user->email}\n\nTo activate the account:\n{$link}\n\nBest,\nBlekkio";
-        $this->mailer->raw($message, function (Message $message) {
-            $message->to($this->adminEmail)
-                ->subject('[Blekkio] New user waiting activation');
-        });
+        $this->tokenRepo->createActivationTokens($user);
 
-        // Mail to user
-        $message = "Hi {$user->name},\n\nWelcome to Blekkio! Your Blekkio account is awaiting manual activation. No action is needed on your behalf. You will receive a new e-mail once the account is activated.\n\nBest,\nBlekkio";
-        $this->mailer->raw($message, function (Message $message) use ($user) {
-            $message->to($user->email)
-                ->subject('[Blekkio] Pending activation');
-        });
+        Mail::to($this->adminEmail)
+            ->send(new AdminNoticeNewUserPending($user));
+
+        Mail::to($user->email)
+            ->send(new NewUserActivationPending($user));
     }
 
     public function activateUser($token)
     {
-        $activation = $this->activationRepo->getActivationByToken($token);
+        $token  = $this->tokenRepo->get($token, 'activate');
 
-        if ($activation === null) {
+        if (is_null($token)) {
             return null;
         }
 
-        $user = User::find($activation->user_id);
+        $user = $token->user;
 
         $user->activated = true;
 
         $user->save();
 
-        $this->activationRepo->deleteActivation($token);
+        $this->tokenRepo->purgeTokensForUser($user);
 
         // Mail to user
-        $message = "Hi {$user->name},\n\nWelcome to Blekkio! Your account has been activated, have fun!\n\nhttps://blekkio.uio.no/\n\nBest,\nBlekkio";
-        $this->mailer->raw($message, function (Message $message) use ($user) {
-            $message->to($user->email)
-                ->subject('[Blekkio] Welcome!');
-        });
+        Mail::to($user->email)
+            ->send(new NewUserAccountActivated($user));
 
         return $user;
-
     }
 
-    private function shouldSend($user)
+    public function cancelActivation($token)
     {
-        $activation = $this->activationRepo->getActivation($user);
-        return $activation === null || strtotime($activation->created_at) + 60 * 60 * $this->resendAfter < time();
+        $activation = $this->tokenRepo->get($token, 'cancel');
+
+        if (is_null($activation)) {
+            return null;
+        }
+
+        $user = User::find($activation->user_id);
+
+        $this->tokenRepo->purgeTokensForUser($user);
+
+        if ($user->activated) {
+            return false;
+        }
+
+        Mail::to($this->adminEmail)
+            ->send(new AdminNoticeNewUserCancelled($user));
+
+        Mail::to($user->email)
+            ->send(new NewUserActivationCancelled($user));
+
+        $user->delete();
+
+        return true;
+    }
+
+    private function shouldSend(User $user)
+    {
+        $token = $this->tokenRepo->getByUser($user, 'activate');
+        return is_null($token) || strtotime($token->created_at) + 60 * 60 * $this->resendAfter < time();
     }
 
 }

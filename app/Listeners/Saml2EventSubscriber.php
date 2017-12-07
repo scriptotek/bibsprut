@@ -5,20 +5,22 @@ namespace App\Listeners;
 use Aacotroneo\Saml2\Events\Saml2LoginEvent;
 use Aacotroneo\Saml2\Events\Saml2LogoutEvent;
 use App\ActivationService;
+use App\TokenRepository;
 use App\User;
 
 class Saml2EventSubscriber
 {
 
-    public function __construct(ActivationService $activationService)
+    public function __construct(ActivationService $activationService, TokenRepository $tokenRepo)
     {
         $this->activationService = $activationService;
+        $this->tokenRepo = $tokenRepo;
     }
 
     /**
      * Handle the event.
      *
-     * @param  Saml2LoginEvent  $event
+     * @param  Saml2LoginEvent $event
      * @return void
      */
     public function onUserLogin(Saml2LoginEvent $event)
