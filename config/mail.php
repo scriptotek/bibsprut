@@ -17,6 +17,11 @@ return [
 
     'driver' => env('MAIL_DRIVER', 'smtp'),
 
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | SMTP Host Address
@@ -54,7 +59,10 @@ return [
     |
     */
 
-    'from' => ['address' => 'd.m.heggo@ub.uio.no', 'name' => 'Blekkio'],
+    'from' => [
+        'address' => env('MAIL_FROM_ADDRESS'),
+        'name' => env('MAIL_FROM_NAME'),
+    ],
 
     /*
     |--------------------------------------------------------------------------
