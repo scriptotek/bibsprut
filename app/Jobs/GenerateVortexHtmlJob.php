@@ -154,7 +154,7 @@ class GenerateVortexHtmlJob extends Job implements ShouldQueue
             // For events with multiple recordings, we get the start and end time from the Vortex event,
             // since that covers the whole event.
             $when = $recording->vortexEvent;
-        } else if ($recording->vortexEvent && (is_null($recording->start_time) || is_null($recording->end_time))) {
+        } else if ($recording->vortexEvent && !is_null($recording->vortexEvent->start_time) && (is_null($recording->start_time) || is_null($recording->end_time))) {
             // If start or end time is missing on the Youtube event, we also prefer the Vortex event.
             $when = $recording->vortexEvent;
         }  else {
