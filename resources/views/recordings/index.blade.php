@@ -121,9 +121,11 @@
           @if (!$recording->start_time)
               <span style="background:#FF9F4F; color: white; display:inline-block; border-radius: 3px; padding: 0 3px; margin: 0 1px;">YouTube start time not set</span>
           @endif
+          {{--
           @if (!$recording->end_time)
               <span style="background:#FF9F4F; color: white; display:inline-block; border-radius: 3px; padding: 0 3px; margin: 0 1px;">YouTube end time not set</span>
           @endif
+          --}}
 
           @if (array_get($recording->youtube_meta, 'duration'))
               {{ array_get($recording->youtube_meta, 'duration') ?: '(none)' }}
