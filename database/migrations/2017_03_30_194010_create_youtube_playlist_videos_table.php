@@ -18,7 +18,7 @@ class CreateYoutubePlaylistVideosTable extends Migration
             $table->integer('youtube_playlist_id')->unsigned();
             $table->integer('youtube_video_id')->unsigned();
 
-            $table->string('playlist_position');
+            $table->integer('playlist_position');
 
             $table->foreign('youtube_playlist_id')
                 ->references('id')->on('youtube_playlists')

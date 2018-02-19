@@ -58,9 +58,19 @@ class YoutubeVideo extends Model
             }
         }
 
-        $recordings = static::orderBy('start_time', 'desc')
-            ->whereNotNull('start_time')
-            ->get();
+        $recordings = static::leftJoin('youtube_playlist_videos', 'youtube_playlist_videos.youtube_video_id', '=', 'youtube_videos.id')
+                    ->select('youtube_videos.*', 'youtube_playlist_videos.playlist_position')
+                    ->orderBy('youtube_videos.start_time', 'desc')
+                    ->orderBy('youtube_playlist_videos.playlist_position', 'asc')
+                    ->whereNotNull('youtube_videos.start_time')
+                    // ->paginate(25); // TODO: Actually utilize this!
+                    ->get();
+
+        // $recordings = static::with('playlists')
+        //     ->orderBy('start_time', 'desc')
+        //     ->orderBy('youtube_playlist_videos.playlist_position', 'asc')
+        //     ->whereNotNull('start_time')
+        //     ->get();
 
         foreach ($recordings as $rec) {
             if (!$includePrivate && !$rec->yt('is_public')) {

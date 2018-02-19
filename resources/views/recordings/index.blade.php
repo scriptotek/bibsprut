@@ -132,6 +132,10 @@
             //
             Views: {{ array_get($recording->youtube_meta, 'views') }}
           @endif
+          @if (isset($recording->playlist_position))
+            //
+            Playlist position: {{ $recording->playlist_position }}
+          @endif
 
           @if ($recording->yt('is_public'))
               <span style="background:#56DF56; color: white; display:inline-block; border-radius: 3px; padding: 0 3px; margin: 0 1px;">Public</span>
