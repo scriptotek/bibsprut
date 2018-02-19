@@ -102,6 +102,8 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
             $meta['thumbnail'] = $data->snippet->thumbnails->default->url;
         }
 
+        $meta['thumbnail'] = str_replace('http://', 'https://', $meta['thumbnail']);
+
         // If a video, not broadcast
         if (!isset($data->status->lifeCycleStatus)) {
             $meta['tags'] = isset($data->snippet->tags) ? $data->snippet->tags : [];

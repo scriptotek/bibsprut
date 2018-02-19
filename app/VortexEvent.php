@@ -88,6 +88,7 @@ class VortexEvent extends Model
                 // Make relative URLs absolute
                 $this->thumbnail = $domain . $this->thumbnail;
             }
+            $this->thumbnail = str_replace('http://', 'https://', $this->thumbnail);
         });
 
         $crawler->filter('.vrtx-introduction')->each(function (Crawler $node) {
