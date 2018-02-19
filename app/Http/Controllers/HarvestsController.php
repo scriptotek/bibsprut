@@ -24,4 +24,15 @@ class HarvestsController extends Controller
 
         return redirect()->back();
     }
+
+    public function log(Request $request)
+    {
+        $config = new \IcyApril\Tail\Config(\storage_path('logs/worker.log'));
+        $config->setLines(2000);
+        $tail = new \IcyApril\Tail\Tail($config);
+
+        return view('harvests.log', [
+            'data' => $tail->getTail(),
+        ]);
+    }
 }

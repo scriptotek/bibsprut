@@ -20,6 +20,7 @@ Route::get('/oauth2callback', 'GoogleAuthController@processCallback');
 Route::get('/oauth2logout', 'GoogleAuthController@logout');
 
 Route::get('/harvests/harvest', 'HarvestsController@harvest');
+Route::get('/harvests/log', 'HarvestsController@log');
 
 Route::get('/videos', 'VideosController@index');
 Route::get('/videos/{id}/hide', 'VideosController@hide')->middleware('can:edit');

@@ -104,7 +104,7 @@
     </div>
     @endif
 
-    <div class="container" style="margin-bottom:150px;">
+    <div class="container" id="app" style="margin-bottom:150px;">
             <img src="/octopus-33147_640.png" style="width:200px; float:right;">
 
         @if (isset($accounts))
@@ -133,16 +133,19 @@
                 @if ($lastHarvest->deleted_at)
                     {{ $lastHarvest->deleted_at->tz('Europe/Oslo')->formatLocalized('%d. %B %Y, %H:%M') }}
                 @else
-                    <em>oppdatering pågår (last siden på nytt for å sjekke om den er ferdig)</em>
+                    <em>startet {{ $lastHarvest->created_at->tz('Europe/Oslo') }} (last siden på nytt for å sjekke om den er ferdig)</em>
                 @endif
             @else
                 aldri
             @endif
+        </div>
+        <div style="margin-top: 1em;">
             @can('edit')
                 @if (!isset($lastHarvest) || $lastHarvest->deleted_at)
                     <a class="btn btn-primary" href="{{ action('HarvestsController@harvest')  }}">Start ny høsting (tilkall blekkspruten)</a>
                 @endif
             @endcan
+            <a class="btn btn-default" href="{{ action('HarvestsController@log') }}">Logg</a>
         </div>
         <p style="margin-top: 1em;">
             Hvordan funker dette? Blekkio oppdaterer enkeltvideor når den får et ping fra YouTube, men det kan av og til bli krøll.
