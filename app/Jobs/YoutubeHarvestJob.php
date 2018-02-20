@@ -9,7 +9,7 @@ use App\Jobs\GenerateVortexHtmlJob;
 use App\VortexEvent;
 use App\YoutubePlaylist;
 use App\YoutubeVideo;
-use App\Tag;
+use App\Entity;
 use Carbon\Carbon;
 use Generator;
 use Google_Service_YouTube;
@@ -259,24 +259,24 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         return $playlists;
     }
 
-    protected function syncTags()
+    protected function syncEntities()
     {
         foreach (YoutubeVideo::get() as $recording) {
-            $tag_ids = [];
-            foreach ($recording->youtube_meta['tags'] as $tagName) {
-                $tag = Tag::withTrashed()->firstOrCreate(['tag_name' => $tagName]);
-                if ($tag->trashed()) {
-                    $tag->restore();
+            $entity_ids = [];
+            foreach ($recording->youtube_meta['tags'] as $tag) {
+                $entity = Entity::withTrashed()->firstOrCreate(['entity_label' => $tag]);
+                if ($entity->trashed()) {
+                    $entity->restore();
                 };
-                $tag_ids[] = $tag->id;
+                $entity_ids[] = $entity->id;
             }
-            $recording->tags()->sync($tag_ids);
+            $recording->entities()->sync($entity_ids);
         }
 
-        $emptyTags = Tag::has('videos', '=', 0)->get();
-        foreach ($emptyTags as $tag) {
-            \Log::info("[YoutubeHarvestJob] Tag not connected to any videos: \"{$tag->tag_name}\"");
-            $tag->delete();  // soft delete to hide from auto complete
+        $unusedEntities = Entity::has('videos', '=', 0)->get();
+        foreach ($unusedEntities as $entity) {
+            \Log::info("[YoutubeHarvestJob] Entity not connected to any videos: \"{$entity->entity_label}\"");
+            $entity->delete();  // soft delete to hide from auto complete
         }
     }
 
@@ -382,7 +382,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
                 $client = $account->getClient();
                 $youtube = $client->make('YouTube');
 
-                $this->syncTags();
+                $this->syncEntities();
 
                 // Harvest videos
                 $videos = array_merge(
@@ -391,7 +391,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
                     iterator_to_array($this->harvestVideos($youtube, $account))
                 );
 
-                $this->syncTags();
+                $this->syncEntities();
 
                 $ids = array_map(function($video) {
                     return $video->youtube_id;

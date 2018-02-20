@@ -14,41 +14,41 @@ class CreateTagsTable extends Migration
      */
     public function up()
     {
-        Schema::create('tag_roles', function (Blueprint $table) {
+        Schema::create('entity_relations', function (Blueprint $table) {
             $table->increments('id');
             $table->text('label')->unique();
             $table->text('description')->nullable();
             $table->timestamps();
         });
 
-        $default_role_id = DB::table('tag_roles')->insertGetId([
-            'label' => 'Subject',
-            'description' => 'A topic the talk/video is about.',
+        $default_role_id = DB::table('entity_relations')->insertGetId([
+            'label' => 'Keyword',
+            'description' => 'A generic keyword.',
             'created_at' => new DateTime(),
             'updated_at' => new DateTime(),
         ]);
 
-        Schema::create('tags', function (Blueprint $table) {
+        Schema::create('entities', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamps();
             $table->softDeletes();
-            $table->text('tag_name')->unique();
-            $table->text('tag_type')->default('Keyword');
-            $table->json('tag_data')->nullable();
+            $table->text('entity_label')->unique();
+            $table->text('entity_type')->default('Keyword');
+            $table->json('entity_data')->nullable();
         });
 
-        Schema::create('tag_youtube_video', function (Blueprint $table) use ($default_role_id) {
+        Schema::create('entity_youtube_video', function (Blueprint $table) use ($default_role_id) {
             $table->integer('youtube_video_id')->unsigned();
-            $table->integer('tag_id')->unsigned();
-            $table->integer('tag_role_id')
+            $table->integer('entity_id')->unsigned();
+            $table->integer('entity_relationship_id')
                 ->unsigned()
                 ->default($default_role_id);
 
-            $table->foreign('tag_role_id')
-                ->references('id')->on('tag_roles');
+            $table->foreign('entity_relationship_id')
+                ->references('id')->on('entity_relations');
 
-            $table->foreign('tag_id')
-                ->references('id')->on('tags')
+            $table->foreign('entity_id')
+                ->references('id')->on('entities')
                 ->onDelete('cascade');
 
             $table->foreign('youtube_video_id')
@@ -64,8 +64,8 @@ class CreateTagsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tag_youtube_video');
-        Schema::dropIfExists('tags');
-        Schema::dropIfExists('tag_roles');
+        Schema::dropIfExists('entity_youtube_video');
+        Schema::dropIfExists('entities');
+        Schema::dropIfExists('entity_relations');
     }
 }

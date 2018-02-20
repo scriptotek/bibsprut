@@ -6,8 +6,8 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\GoogleAccount;
 use App\Harvest;
-use App\Tag;
-use App\TagRole;
+use App\Entity;
+use App\EntityRelation;
 use App\YoutubeVideo;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Mailer;
@@ -105,34 +105,36 @@ class VideosController extends Controller
     {
         $video = YoutubeVideo::withTrashed()->where('youtube_id', '=', $id)->first();
 
-        $tags = [];
-        foreach ($video->tags as $tag) {
-            $tags[] = $tag->simpleRepresentation();
+        $entities = [];
+        foreach ($video->entities as $entity) {
+            $entities[] = $entity->simpleRepresentation();
         }
 
         return response()->view('videos.show', [
             'video' => $video,
-            'tags' => $tags,
-            'tagRoles' => TagRole::get(),
+            'entities' => $entities,
+            'entityRelations' => EntityRelation::get(),
         ]);
     }
 
     /**
      * Update the specified resource in storage.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function updateTags(Request $request)
+    public function updateEntities(Request $request)
     {
         $video = YoutubeVideo::where('youtube_id', '=', $request->youtube_id)->first();
 
-        $tags = [];
-        $newTags = [];
-        foreach ($request->tags as $tagData) {
-            $tag = Tag::withTrashed()->firstOrCreate(['tag_name' => $tagData['tag_name']]);
-            $tags[] = $tag;
-            $newTags[$tag->id] = ['tag_role_id' => $tagData['tag_role_id']];
+        $entities = [];
+        $newEntities = [];
+        foreach ($request->entities as $entityData) {
+            $entity = Entity::withTrashed()->firstOrCreate(['entity_label' => $entityData['entity_label']]);
+            $entities[] = $entity;
+            $newEntities[$entity->id] = ['entity_relationship_id' => $entityData['entity_relationship_id']];
         }
 
-        $video->tags()->sync($newTags);
+        $video->entities()->sync($newEntities);
 
         return response()->json([
             'status' => 'ok',

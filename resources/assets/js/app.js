@@ -20,10 +20,10 @@ import vSelect from 'vue-select';
 // Vue.component('autocomplete', Autocomplete);
 
 Vue.component('v-select', vSelect);
-Vue.component('tag-edit-form', require('./components/TagEditForm.vue'));
-Vue.component('tag-type-select', require('./components/TagTypeSelect.vue'));
-Vue.component('tag-editor', require('./components/TagEditor.vue'));
-Vue.component('tag-statement', require('./components/TagStatement.vue'));
+// Vue.component('tag-edit-form', require('./components/TagEditForm.vue'));
+Vue.component('entity-type-select', require('./components/EntityTypeSelect.vue'));
+Vue.component('entity-editor', require('./components/EntityEditor.vue'));
+Vue.component('statement', require('./components/Statement.vue'));
 
 const app = new Vue({
     el: '#app'

@@ -24,22 +24,22 @@ Route::get('/harvests/log', 'HarvestsController@log');
 
 Route::get('/videos', 'VideosController@index');
 Route::get('/videos/{id}', 'VideosController@show');
-Route::put('/videos/{id}/updateTags', 'VideosController@updateTags');
+Route::put('/videos/{id}/updateEntities', 'VideosController@updateEntities');
 Route::get('/videos/{id}/hide', 'VideosController@hide')->middleware('can:edit');
 Route::get('/feed', 'VideosController@feed');
 
-Route::get('/entities.json', 'TagsController@json');
-Route::resource('entities', 'TagsController');
+Route::get('/entities.json', 'EntitiesController@json');
+Route::resource('entities', 'EntitiesController');
 
-Route::get('/relations.json', 'TagRoleController@json');
-Route::resource('relations', 'TagRoleController');
+Route::get('/relations.json', 'RelationController@json');
+Route::resource('relations', 'RelationController');
 
-// Route::get('/tag-roles', 'TagRoleController@index');
-// Route::get('/tag-roles/create', 'TagRoleController@create')->middleware('can:edit');
-// Route::get('/tag-roles/edit/{id}', 'TagRoleController@edit')->middleware('can:edit');
-// Route::post('/tag-roles/{id}', 'TagRoleController@update')->middleware('can:edit');
-// Route::post('/tag-roles', 'TagRoleController@store')->middleware('can:edit');
-// Route::get('/tag-roles/{id}', 'TagRoleController@show');
+// Route::get('/relations', 'RelationController@index');
+// Route::get('/relations/create', 'RelationController@create')->middleware('can:edit');
+// Route::get('/relations/edit/{id}', 'RelationController@edit')->middleware('can:edit');
+// Route::post('/relations/{id}', 'RelationController@update')->middleware('can:edit');
+// Route::post('/relations', 'RelationController@store')->middleware('can:edit');
+// Route::get('/relations/{id}', 'RelationController@show');
 
 Route::get('user/activation/{token}', 'Auth\LoginController@activateUser')->name('user.activate');
 Route::get('user/cancel/{token}', 'Auth\LoginController@cancelActivation')->name('user.cancel');

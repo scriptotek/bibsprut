@@ -154,11 +154,11 @@ class YoutubeVideo extends Model
     /**
      * Get the tags the video have attached.
      */
-    public function tags()
+    public function entities()
     {
-        return $this->belongsToMany('App\Tag')
-            ->withPivot('tag_role_id')
-            ->using('App\VideoTag');
+        return $this->belongsToMany('App\Entity')
+            ->withPivot('entity_relationship_id')
+            ->using('App\VideoEntityRelation');
     }
 
     /**

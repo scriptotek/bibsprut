@@ -5,21 +5,21 @@
     export default {
         data: function() {
             return {
-                tag_id: '',
-                tag_name: '',
-                tag_type: '',
+                entity_id: '',
+                entity_label: '',
+                entity_type: '',
             }
         },
         props: {
-            tagData: {
+            entityData: {
                 type: Object,
                 default: {},
             }
         },
         mounted() {
-            this.tag_id = this.tagData.id;
-            this.tag_name = this.tagData.tag_name;
-            this.tag_type = this.tagData.tag_type;
+            this.entity_id = this.entityData.id;
+            this.entity_label = this.entityData.entity_label;
+            this.entity_type = this.entityData.entity_type;
         },
         methods: {
         }
@@ -28,7 +28,7 @@
 <template>
 
     <h2>
-        <span>{{ tag_name }}</span>
+        <span>{{ entity_label }}</span>
     </h2>
 
 

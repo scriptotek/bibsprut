@@ -37,8 +37,8 @@
         },
         mounted() {
             // if (this.tagData) {
-            //     this.tags = JSON.parse(this.tagData);
-            //     console.log(this.tags);
+            //     this.entities = JSON.parse(this.tagData);
+            //     console.log(this.entities);
             // }
         }
     }

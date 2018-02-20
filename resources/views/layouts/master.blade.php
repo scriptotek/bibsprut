@@ -54,8 +54,8 @@
                 <ul class="nav navbar-nav">
                     <li><a href="{{ action('VideosController@index' ) }}">Videos</a></li>
                     <li><a href="{{ action('UsersController@index' ) }}">User</a></li>
-                    <li><a href="{{ action('TagsController@index' ) }}">Entities</a></li>
-                    <li><a href="{{ action('TagRoleController@index' ) }}">Relations</a></li>
+                    <li><a href="{{ action('EntitiesControllerndex' ) }}">Entities</a></li>
+                    <li><a href="{{ action('RelationControllerx' ) }}">Relations</a></li>
                 </ul>
 
                 <!-- Right Side Of Navbar -->

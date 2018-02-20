@@ -33,7 +33,7 @@ class CreateYoutubeVideosTable extends Migration
             // $table->string('language', 6)->nullable();
             // $table->string('title');
             // $table->text('description');
-            // $table->json('tags');
+            // $table->json('entities');
             // $table->integer('views')->unsigned();
             // $table->string('thumbnail')->nullable();
             // $table->string('duration')->nullable();

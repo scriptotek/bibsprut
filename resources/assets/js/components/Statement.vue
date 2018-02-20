@@ -9,7 +9,7 @@
         <div class="stmt-value" style="flex:1 1 auto">
             <v-select
                 taggable
-                label="tag_name"
+                label="entity_label"
                 :filterable="false"
                 :options="valueOptions"
                 :value="selectedValue"
@@ -18,24 +18,24 @@
                 <template slot="no-options">
                     type to search...
                 </template>
-                <template slot="option" slot-scope="tag">
+                <template slot="option" slot-scope="entity">
                     <div>
-                        <span v-if="tag.id">
-                            <span style="float:right; opacity: 0.5;">#{{ tag.id }}</span>
-                            {{ tag.tag_name }}
+                        <span v-if="entity.id">
+                            <span style="float:right; opacity: 0.5;">#{{ entity.id }}</span>
+                            {{ entity.entity_label }}
                         </span>
                         <span v-else>
-                            <em>+ Opprett «{{ tag.tag_name }}»</em>
+                            <em>+ Opprett «{{ entity.entity_label }}»</em>
                         </span>
                     </div>
                 </template>
-                <template slot="selected-option" slot-scope="tag">
+                <template slot="selected-option" slot-scope="entity">
                     <div class="selected">
-                        <span v-if="tag.id">
-                            {{ tag.tag_name }}
+                        <span v-if="entity.id">
+                            {{ entity.entity_label }}
                         </span>
                         <span v-else>
-                            <em>{{ tag.tag_name }}</em>
+                            <em>{{ entity.entity_label }}</em>
                         </span>
                     </div>
                 </template>
@@ -70,7 +70,7 @@
         mounted() {
             this.propertyOptions = this.properties;
             this.propertyOptions.forEach((x) => {
-                if (x.value == this.value.tag_role_id) {
+                if (x.value == this.value.entity_relation_id) {
                     this.selectedProperty = x;
                 }
             });

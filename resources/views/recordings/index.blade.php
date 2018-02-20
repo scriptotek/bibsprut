@@ -207,8 +207,8 @@
         </div>
 
         <div>
-          @foreach ($recording->tags as $tag)
-            <a class="label label-success" href="{{ action('TagsController@show', $tag->id) }}">{{ $tag->tag_name }}</a>
+          @foreach ($recording->entities as $entity)
+            <a class="label label-success" href="{{ action('EntitiesControllerller', $entity->id) }}">{{ $entity->entity_label }}</a>
           @endforeach
 
           @foreach ($recording->playlists as $plist)

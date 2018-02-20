@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Tag extends Model
+class Entity extends Model
 {
     use SoftDeletes;
 
@@ -21,7 +21,7 @@ class Tag extends Model
      *
      * @var array
      */
-    protected $fillable = ['tag_name', 'tag_data', 'tag_type'];
+    protected $fillable = ['entity_label', 'entity_data', 'entity_type'];
 
     /**
      * Get the videos for the playlist.
@@ -29,18 +29,18 @@ class Tag extends Model
     public function videos()
     {
         return $this->belongsToMany('App\YoutubeVideo')
-            ->withPivot('tag_role_id')
-            ->using('App\VideoTag');
+            ->withPivot('entity_relationship_id')
+            ->using('App\VideoEntityRelation');
     }
 
     public function simpleRepresentation()
     {
         $x = [
             'id' => $this->id,
-            'tag_name' => $this->tag_name,
+            'entity_label' => $this->entity_label,
         ];
         if (isset($this->pivot)) {
-            $x['tag_role_id'] = $this->pivot->tag_role_id;
+            $x['entity_relationship_id'] = $this->pivot->entity_relationship_id;
         }
         return $x;
     }

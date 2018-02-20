@@ -27,9 +27,9 @@
 
         <iframe width="560" height="315" src="{{ $video->youtubeLink('embed') }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
-        <tag-editor
+        <entity-editor
             video-id='{{ $video->youtube_id }}'
-            property-data='{{ json_encode($tagRoles, JSON_UNESCAPED_UNICODE) }}'
-            tag-data='{{ json_encode($tags, JSON_UNESCAPED_UNICODE) }}'></tag-editor>
+            property-data='{{ json_encode($entityRelations, JSON_UNESCAPED_UNICODE) }}'
+            entity-data='{{ json_encode($entities, JSON_UNESCAPED_UNICODE) }}'></entity-editor>
     </div>
 @endsection
