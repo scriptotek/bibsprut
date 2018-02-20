@@ -6,6 +6,10 @@
  */
 
 require('./bootstrap');
+// require('vue2-autocomplete-js/dist/style/vue2-autocomplete.css')
+
+import vSelect from 'vue-select';
+// import Autocomplete from 'vue2-autocomplete-js';
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -13,7 +17,13 @@ require('./bootstrap');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('example', require('./components/Example.vue'));
+// Vue.component('autocomplete', Autocomplete);
+
+Vue.component('v-select', vSelect);
+Vue.component('tag-edit-form', require('./components/TagEditForm.vue'));
+Vue.component('tag-type-select', require('./components/TagTypeSelect.vue'));
+Vue.component('tag-editor', require('./components/TagEditor.vue'));
+Vue.component('tag-statement', require('./components/TagStatement.vue'));
 
 const app = new Vue({
     el: '#app'

@@ -2,6 +2,54 @@
 
 @section('content')
 
+  <img src="/octopus-33147_640.png" style="width:200px; float:right;">
+
+        @if (isset($accounts))
+        <div>
+            Kontoer:
+            @foreach ($accounts as $acc)
+              <div style="display: inline-block;background:#eee;border-radius: 15px; padding-right:8px;">
+                  <img src="{{ $acc->userinfo['picture'] }}" style="width:30px; border-radius:15px;">
+                  {{ $acc->userinfo['name'] }}
+                  @can('edit')
+                  <a href="{{ action('GoogleAuthController@logout', ['email' => $acc->id]) }}">[X]</a>
+                  @endcan
+              </div>
+            @endforeach
+            @can('edit')
+            <div style="display: inline-block;">
+                <a href="{{ action('GoogleAuthController@initiate') }}">Legg til</a>
+            </div>
+            @endcan
+        </div>
+        @endif
+
+        <div style="margin-top: 1em;">
+            Siste fullstendige høsting:
+            @if (isset($lastHarvest))
+                @if ($lastHarvest->deleted_at)
+                    {{ $lastHarvest->deleted_at->tz('Europe/Oslo')->formatLocalized('%d. %B %Y, %H:%M') }}
+                @else
+                    <em>startet {{ $lastHarvest->created_at->tz('Europe/Oslo') }} (last siden på nytt for å sjekke om den er ferdig)</em>
+                @endif
+            @else
+                aldri
+            @endif
+        </div>
+        <div style="margin-top: 1em;">
+            @can('edit')
+                @if (!isset($lastHarvest) || $lastHarvest->deleted_at)
+                    <a class="btn btn-primary" href="{{ action('HarvestsController@harvest')  }}">Start ny høsting (tilkall blekkspruten)</a>
+                @endif
+            @endcan
+            <a class="btn btn-default" href="{{ action('HarvestsController@log') }}">Logg</a>
+        </div>
+        <p style="margin-top: 1em;">
+            Hvordan funker dette? Blekkio oppdaterer enkeltvideor når den får et ping fra YouTube, men det kan av og til bli krøll.
+            Hvis det blir krøll, logg inn og trykk "Start ny høsting (tilkall blekkspruten)" for å gjøre en fullstendig
+            høsting (tar 1-2 minutter) fulgt av en oppdatering av UB live. Fullstendige høstinger gjøres også automatisk 2 ganger i døgnet.
+        </p>
+
 
 
   <!-- Default panel contents -->
@@ -93,9 +141,7 @@
       </div>
 
       <div style="flex: 1 1 auto;">
-        @if (count($event['recordings']) > 1)
-          <strong>{{ array_get($recording->youtube_meta, 'title') }}</strong>
-        @endif
+        <strong><a href="{{ action('VideosController@show', $recording->youtube_id) }} ">{{ array_get($recording->youtube_meta, 'title') }}</a></strong>
 
 {{--        @if (is_null($recording->presentation))
           <a href="{{ action('EventsController@create', ['from_recording' => $recording['id']]) }}" style="margin:0 0 0 10px;">
@@ -161,8 +207,8 @@
         </div>
 
         <div>
-          @foreach (array_get($recording->youtube_meta, 'tags', []) as $tag)
-            <span class="label label-success">{{ $tag }}</span>
+          @foreach ($recording->tags as $tag)
+            <a class="label label-success" href="{{ action('TagsController@show', $tag->id) }}">{{ $tag->tag_name }}</a>
           @endforeach
 
           @foreach ($recording->playlists as $plist)

@@ -59,12 +59,14 @@ class YoutubeVideo extends Model
         }
 
         $recordings = static::leftJoin('youtube_playlist_videos', 'youtube_playlist_videos.youtube_video_id', '=', 'youtube_videos.id')
+                    // ->leftJoin('tag_youtube_video', 'tag_youtube_video.youtube_video_id', '=', 'youtube_videos.id')
+                    //->leftJoin('tags', 'tag_youtube_video.youtube_video_id', '=', 'tags.id')
                     ->select('youtube_videos.*', 'youtube_playlist_videos.playlist_position')
                     ->orderBy('youtube_videos.start_time', 'desc')
                     ->orderBy('youtube_playlist_videos.playlist_position', 'asc')
                     ->whereNotNull('youtube_videos.start_time')
-                    // ->paginate(25); // TODO: Actually utilize this!
-                    ->get();
+                    ->paginate(25); // TODO: Actually utilize this!
+                    //->get();
 
         // $recordings = static::with('playlists')
         //     ->orderBy('start_time', 'desc')
@@ -147,6 +149,16 @@ class YoutubeVideo extends Model
     {
         return $this->belongsToMany('App\YoutubePlaylist', 'youtube_playlist_videos')
             ->withPivot('playlist_position');
+    }
+
+    /**
+     * Get the tags the video have attached.
+     */
+    public function tags()
+    {
+        return $this->belongsToMany('App\Tag')
+            ->withPivot('tag_role_id')
+            ->using('App\VideoTag');
     }
 
     /**

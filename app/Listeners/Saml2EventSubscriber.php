@@ -35,13 +35,14 @@ class Saml2EventSubscriber
             return;
         }
 
-        $feideId = $attrs['eduPersonPrincipalName'][0];  // @TODO: Move default domain to config
+        $feideId = $attrs['eduPersonPrincipalName'][0];
 
         $user = User::firstOrNew(['feide_id' => $feideId]);
 
         if (!$user->exists) {
             $user->name = $attrs['cn'][0];
-            $user->email = $attrs['mail'][0];
+            // $user->email = $attrs['mail'][0];
+            $user->email = "d.m.heggo@ub.uio.no";
             $user->save();
 
             $this->activationService->sendActivationMail($user);

@@ -6,6 +6,8 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\GoogleAccount;
 use App\Harvest;
+use App\Tag;
+use App\TagRole;
 use App\YoutubeVideo;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Mailer;
@@ -91,6 +93,50 @@ class VideosController extends Controller
 
         $request->session()->flash('status', '«' . $rec->yt('title') . '» ble skjult');
         return redirect()->back();
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $video = YoutubeVideo::withTrashed()->where('youtube_id', '=', $id)->first();
+
+        $tags = [];
+        foreach ($video->tags as $tag) {
+            $tags[] = $tag->simpleRepresentation();
+        }
+
+        return response()->view('videos.show', [
+            'video' => $video,
+            'tags' => $tags,
+            'tagRoles' => TagRole::get(),
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function updateTags(Request $request)
+    {
+        $video = YoutubeVideo::where('youtube_id', '=', $request->youtube_id)->first();
+
+        $tags = [];
+        $newTags = [];
+        foreach ($request->tags as $tagData) {
+            $tag = Tag::withTrashed()->firstOrCreate(['tag_name' => $tagData['tag_name']]);
+            $tags[] = $tag;
+            $newTags[$tag->id] = ['tag_role_id' => $tagData['tag_role_id']];
+        }
+
+        $video->tags()->sync($newTags);
+
+        return response()->json([
+            'status' => 'ok',
+        ]);
     }
 
 }

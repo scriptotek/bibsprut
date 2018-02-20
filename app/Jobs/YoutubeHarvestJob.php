@@ -9,6 +9,7 @@ use App\Jobs\GenerateVortexHtmlJob;
 use App\VortexEvent;
 use App\YoutubePlaylist;
 use App\YoutubeVideo;
+use App\Tag;
 use Carbon\Carbon;
 use Generator;
 use Google_Service_YouTube;
@@ -80,6 +81,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         if (!empty($meta['description'])) {
             $vortexLink = $this->vortexUrlFromText($meta['description']);
             if (empty($vortexLink)) {
+                \Log::warning('No vortex link found for YouTube video: ' . $data->id);
                 $recording->vortex_event_id = null;
             } else {
                 try {
@@ -118,6 +120,7 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         if (isset($data->snippet->scheduledStartTime)) {
             // Prefer scheduledStartTime
             $recording->start_time = $this->normalizeDateTime($data->snippet->scheduledStartTime);
+
         } else if (isset($data->recordingDetails) && isset($data->recordingDetails->recordingDate)) {
             // but use recordingDate if scheduledStartTime not set
             $recording->start_time = $this->normalizeDate($data->recordingDetails->recordingDate);
@@ -256,6 +259,27 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
         return $playlists;
     }
 
+    protected function syncTags()
+    {
+        foreach (YoutubeVideo::get() as $recording) {
+            $tag_ids = [];
+            foreach ($recording->youtube_meta['tags'] as $tagName) {
+                $tag = Tag::withTrashed()->firstOrCreate(['tag_name' => $tagName]);
+                if ($tag->trashed()) {
+                    $tag->restore();
+                };
+                $tag_ids[] = $tag->id;
+            }
+            $recording->tags()->sync($tag_ids);
+        }
+
+        $emptyTags = Tag::has('videos', '=', 0)->get();
+        foreach ($emptyTags as $tag) {
+            \Log::info("[YoutubeHarvestJob] Tag not connected to any videos: \"{$tag->tag_name}\"");
+            $tag->delete();  // soft delete to hide from auto complete
+        }
+    }
+
     /*
      * Harvest all videos, both private and public
      */
@@ -358,12 +382,17 @@ class YoutubeHarvestJob extends Job implements ShouldQueue
                 $client = $account->getClient();
                 $youtube = $client->make('YouTube');
 
+                $this->syncTags();
+
                 // Harvest videos
                 $videos = array_merge(
                     iterator_to_array($this->harvestCompletedLiveBroadcasts($youtube, $account)),
                     iterator_to_array($this->harvestLiveBroadcasts($youtube, $account)),
                     iterator_to_array($this->harvestVideos($youtube, $account))
                 );
+
+                $this->syncTags();
+
                 $ids = array_map(function($video) {
                     return $video->youtube_id;
                 }, $videos);

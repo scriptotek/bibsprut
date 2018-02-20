@@ -4,11 +4,22 @@
     <title>Blekkio</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        window.Laravel = <?php echo json_encode([
+            'csrfToken' => csrf_token(),
+        ]); ?>
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
     <link rel="shortcut icon" href="/img/favicon.ico">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
     <!--
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap-theme.min.css">
     -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.1.2/css/material-design-iconic-font.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.8.4/jquery.timepicker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.min.css">
@@ -39,6 +50,13 @@
             </div>
 
             <div class="collapse navbar-collapse" id="app-navbar-collapse">
+
+                <ul class="nav navbar-nav">
+                    <li><a href="{{ action('VideosController@index' ) }}">Videos</a></li>
+                    <li><a href="{{ action('UsersController@index' ) }}">User</a></li>
+                    <li><a href="{{ action('TagsController@index' ) }}">Entities</a></li>
+                    <li><a href="{{ action('TagRoleController@index' ) }}">Relations</a></li>
+                </ul>
 
                 <!-- Right Side Of Navbar -->
                 <ul class="nav navbar-nav navbar-right">
@@ -105,54 +123,6 @@
     @endif
 
     <div class="container" id="app" style="margin-bottom:150px;">
-            <img src="/octopus-33147_640.png" style="width:200px; float:right;">
-
-        @if (isset($accounts))
-        <div>
-            Kontoer:
-            @foreach ($accounts as $acc)
-              <div style="display: inline-block;background:#eee;border-radius: 15px; padding-right:8px;">
-                  <img src="{{ $acc->userinfo['picture'] }}" style="width:30px; border-radius:15px;">
-                  {{ $acc->userinfo['name'] }}
-                  @can('edit')
-                  <a href="{{ action('GoogleAuthController@logout', ['email' => $acc->id]) }}">[X]</a>
-                  @endcan
-              </div>
-            @endforeach
-            @can('edit')
-            <div style="display: inline-block;">
-                <a href="{{ action('GoogleAuthController@initiate') }}">Legg til</a>
-            </div>
-            @endcan
-        </div>
-        @endif
-
-        <div style="margin-top: 1em;">
-            Siste fullstendige høsting:
-            @if (isset($lastHarvest))
-                @if ($lastHarvest->deleted_at)
-                    {{ $lastHarvest->deleted_at->tz('Europe/Oslo')->formatLocalized('%d. %B %Y, %H:%M') }}
-                @else
-                    <em>startet {{ $lastHarvest->created_at->tz('Europe/Oslo') }} (last siden på nytt for å sjekke om den er ferdig)</em>
-                @endif
-            @else
-                aldri
-            @endif
-        </div>
-        <div style="margin-top: 1em;">
-            @can('edit')
-                @if (!isset($lastHarvest) || $lastHarvest->deleted_at)
-                    <a class="btn btn-primary" href="{{ action('HarvestsController@harvest')  }}">Start ny høsting (tilkall blekkspruten)</a>
-                @endif
-            @endcan
-            <a class="btn btn-default" href="{{ action('HarvestsController@log') }}">Logg</a>
-        </div>
-        <p style="margin-top: 1em;">
-            Hvordan funker dette? Blekkio oppdaterer enkeltvideor når den får et ping fra YouTube, men det kan av og til bli krøll.
-            Hvis det blir krøll, logg inn og trykk "Start ny høsting (tilkall blekkspruten)" for å gjøre en fullstendig
-            høsting (tar 1-2 minutter) fulgt av en oppdatering av UB live. Fullstendige høstinger gjøres også automatisk 2 ganger i døgnet.
-        </p>
-
         @yield('content')
     </div>
 
@@ -167,6 +137,9 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/locales/bootstrap-datepicker.no.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.2.0/min/dropzone.min.js"></script>
+
+    <script src="{{ URL::to('js/app.js') }}"></script>
+
     @yield('script')
 </body>
 </html>

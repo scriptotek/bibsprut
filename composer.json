@@ -25,7 +25,8 @@
         "sentry/sentry": "^1.6",
         "sentry/sentry-laravel": "^0.7.0",
         "pubsubhubbub/subscriber": "^1.1",
-        "danmichaelo/quitesimplexmlelement": "~1.0"
+        "danmichaelo/quitesimplexmlelement": "~1.0",
+        "icyapril/tail": "^1.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
